@@ -15,7 +15,7 @@ def main() -> None:
         Engine.LoopSleep()
 
         ## Clean the console for better readability of logs
-        Engine.CleanConsole()
+        Engine.ClearConsole()
 
         # Wait for the click delay with added randomization
         Engine.Log("Mouse click for mining")

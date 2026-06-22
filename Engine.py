@@ -93,6 +93,6 @@ class Engine:
         print(f"[{timestamp}] {message}", end=end)
 
     @staticmethod
-    def CleanConsole() -> None:
+    def ClearConsole() -> None:
         """Clear the console for better readability."""
         Engine.Log("\033c", end="")
