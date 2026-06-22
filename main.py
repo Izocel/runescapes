@@ -8,96 +8,34 @@ This script repeatedly performs:
 Delays include randomization to mimic human‑like behavior.
 """
 
-import time
-import random
-from datetime import datetime
-import keyboard
-import mouse
+from Engine import Engine
 
-# --- Configuration constants ---
-CLICK_DELAY_SEC = 25          # Base delay between mouse clicks
+# --- Configuration variables ---
+CLICK_DELAY_SEC = 25          # Base delay between mouse clicks for mining
 
-KEY_PRESS_DELAY_SEC = 120     # Minimum delay between key presses
-STASH_KEY = "num 0"          # Key to press periodically
-
-
-def random_range(min_val: float = 1.0, max_val: float = 5.0) -> float:
-    """
-    Return a random float between min_val and max_val.
-
-    Parameters:
-        min_val (float): Lower bound of the random range.
-        max_val (float): Upper bound of the random range.
-
-    Returns:
-        float: A random number within the given range.
-    """
-    return random.uniform(min_val, max_val)
-
-
-def mouse_click(button: str = "left") -> None:
-    """
-    Perform a mouse click using the specified button.
-
-    Parameters:
-        button (str): Mouse button to click ("left", "right", etc.).
-    """
-    mouse.click(button)
-
-
-def press_key(key: str) -> None:
-    """
-    Press and release a keyboard key with a small randomized delay.
-
-    Parameters:
-        key (str): The key to press (e.g., "num 0", "space", "a").
-    """
-    keyboard.press(key)
-    time.sleep(random_range(0.20, 0.80))  # Human‑like key hold duration
-    keyboard.release(key)
-
-def delay_passed(last_time: float, delay: float) -> bool:
-    """
-    Check whether the required delay has passed since last_time.
-
-    Parameters:
-        last_time (float): Timestamp of the last action (seconds since epoch).
-        delay (float): Required delay in seconds.
-
-    Returns:
-        bool: True if enough time has passed, False otherwise.
-    """
-    now = time.time()
-    return last_time == 0 or delay <= 0 or (now - last_time) >= delay
+STASH_KEY = "num 0"           # Key to press for stashing (e.g., "num 0" for Numpad 0)
+KEY_PRESS_DELAY_SEC = 120     # Base delay between key presses for stashing
 
 
 def main() -> None:
-    """
-    Main automation loop.
-
-    Repeatedly:
-    - Waits a randomized delay
-    - Performs a mouse click
-    - Periodically presses a keyboard key
-    """
-    last_keyboard_time = 0
+    LAST_STASH_PRESS_TIME = 0
 
     while True:
-        # Randomized wait before each click
-        wait_time = CLICK_DELAY_SEC + random_range(1.0, 3.0)
-        print(f"[INFO] Waiting {wait_time:.2f}s before next click...")
-        time.sleep(wait_time)
+        # Randomized wait before each loop to randomize all actions and avoid detection
+        Engine.LoopSleep()
 
-        # Perform mouse click
-        print("[ACTION] Mouse click for mining")
-        mouse_click()
+        ## Clean the console for better readability of logs
+        Engine.CleanConsole()
 
-        # Perform periodic key press
-        if delay_passed(last_keyboard_time, KEY_PRESS_DELAY_SEC):
-            last_keyboard_time = time.time()
-            print("[ACTION] Pressing stash key")
-            press_key(STASH_KEY)
+        # Wait for the click delay with added randomization
+        Engine.Log("Mouse click for mining")
+        Engine.MouseClick("left")
 
+        # Check if it's time to press the stash key
+        if Engine.DelayPassed(LAST_STASH_PRESS_TIME, KEY_PRESS_DELAY_SEC):
+            Engine.Log("Pressing stash key")
+            LAST_STASH_PRESS_TIME = Engine.CurrentTimeStamp()
+            Engine.KeyPress(STASH_KEY)
 
 if __name__ == "__main__":
     main()
