@@ -1,13 +1,3 @@
-"""
-Auto‑clicker and key‑press automation script.
-
-This script repeatedly performs:
-1. A timed mouse click (used here for mining actions)
-2. A periodic keyboard press (used here for stashing)
-
-Delays include randomization to mimic human‑like behavior.
-"""
-
 from Engine import Engine
 
 # --- Configuration variables ---
