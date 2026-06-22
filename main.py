@@ -9,9 +9,11 @@ STASH_KEY = "num 0"             # Key to press for stashing (e.g., "num 0" for N
 STASH_DELAY = 120               # Base delay between key presses for stashing
 LAST_STASH_PRESS_TIME = 0       # Timestamp of the last stash key press
 
+READY_DELAY = 30                # Delay before starting the main loop to allow the user to prepare (e.g., switch to the game window)
 
 def main() -> None:
-    LAST_STASH_PRESS_TIME = 0
+    Engine.Log(f"Starting in {READY_DELAY} seconds. Please switch to the game window.")
+    Engine.Sleep(READY_DELAY)
 
     while True:
         # Randomized wait before each loop to randomize all actions and avoid detection
