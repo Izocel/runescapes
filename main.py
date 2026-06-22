@@ -84,7 +84,7 @@ def main() -> None:
 
     while True:
         # Randomized wait before each click
-        wait_time = CLICK_DELAY_SEC + random_range(0.5, 1.0)
+        wait_time = CLICK_DELAY_SEC + random_range(1.0, 3.0)
         print(f"[INFO] Waiting {wait_time:.2f}s before next click...")
         time.sleep(wait_time)
 
