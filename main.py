@@ -26,7 +26,7 @@ def main() -> None:
         # Check if it's time to click for mining
         if Engine.DelayPassed(LAST_MINING_CLICK_TIME, MINING_DELAY):
             Engine.Log("Mouse click for mining")
-            Engine.KeyPress(MINING_KEY)
+            Engine.MouseClick(MINING_KEY)
             LAST_MINING_CLICK_TIME = Engine.CurrentTimeStamp()
 
         # Check if it's time to press the stash key
