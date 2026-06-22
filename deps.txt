@@ -1,2 +1,4 @@
-keyboard
 mouse
+keyboard
+PyAutoGUI
+human-mouse
