@@ -19,7 +19,7 @@ def main() -> None:
 
         # Wait for the click delay with added randomization
         Engine.Log("Mouse click for mining")
-        Engine.MouseClick("left")
+        Engine.MouseClick()
 
         # Check if it's time to press the stash key
         if Engine.DelayPassed(LAST_STASH_PRESS_TIME, KEY_PRESS_DELAY_SEC):
