@@ -1,24 +1,29 @@
 import time
 import random
-import datetime
 import keyboard
+import datetime
 from pyHM import mouse
+from human_mouse import MouseController
+
+MC = MouseController(always_zigzag=True)
 
 class Engine:
-    LOOP_MIN_DELAY = 1.0
-    LOOP_MAX_DELAY = 3.0
-    MOUSE_MIN_DELAY = 0.2
-    MOUSE_MAX_DELAY = 0.5
-    KEY_MIN_DELAY = 0.2
-    KEY_MAX_DELAY = 0.8
+    LOOP_MIN_DELAY = 1.0        # Minimum delay between loops in seconds
+    LOOP_MAX_DELAY = 3.0        # Maximum delay between loops in seconds
+    MOUSE_MIN_DELAY = 0.2       # Minimum delay for mouse actions in seconds
+    MOUSE_MAX_DELAY = 0.5       # Maximum delay for mouse actions in seconds
+    KEY_MIN_DELAY = 0.2         # Minimum delay for keyboard actions in seconds
+    KEY_MAX_DELAY = 0.8         # Maximum delay for keyboard actions in seconds
+    MOUSE_SPEED = 0.01          # Default speed factor for mouse movements (lower is faster)
 
     def __init__(self):
         pass
 
     @staticmethod
-    def Sleep(seconds: float = 0.0) -> None:
+    def Sleep(seconds: float = None) -> None:
         """Sleep for the specified number of seconds."""
-        time.sleep(seconds)
+        if seconds is not None:
+            time.sleep(seconds)
 
     @staticmethod
     def LoopSleep() -> None:
@@ -27,43 +32,54 @@ class Engine:
         Engine.Sleep(total_delay)
 
     @staticmethod
-    def MouseWait(base_delay: float = 0.0) -> None:
+    def MouseWait(base_delay: float = None) -> None:
         """Wait for a randomized delay based on the base_delay and configured random range."""
-        total_delay = base_delay + Engine.RandomFloat(Engine.MOUSE_MIN_DELAY, Engine.MOUSE_MAX_DELAY)
+        total_delay = (base_delay or 0.0) + Engine.RandomFloat(Engine.MOUSE_MIN_DELAY, Engine.MOUSE_MAX_DELAY)
         Engine.Sleep(total_delay)
     
     @staticmethod
-    def KeyWait(base_delay: float = 0.0) -> None:
+    def KeyWait(base_delay: float = None) -> None:
         """Wait for a randomized delay based on the base_delay and configured random range."""
-        total_delay = base_delay + Engine.RandomFloat(Engine.KEY_MIN_DELAY, Engine.KEY_MAX_DELAY)
+        total_delay = (base_delay or 0.0) + Engine.RandomFloat(Engine.KEY_MIN_DELAY, Engine.KEY_MAX_DELAY)
         Engine.Sleep(total_delay)
 
     @staticmethod
-    def MouseClick(button: str = "left", x: int = None, y: int = None) -> None:
-        """Perform a mouse click at the specified coordinates (or current position if None)."""
+    def MoveMouse(x: int, y: int, speed: float = None) -> None:
+        """Move the MC to the specified coordinates with optional speed."""
         if x is not None and y is not None:
-            mouse.move(x, y)
+            MC.move(x, y, speed_factor=speed or Engine.MOUSE_SPEED)
+    
+    @staticmethod
+    def MouseDown(button: str = "left", x: int = None, y: int = None, speed: float = None) -> None:
+        """Press and hold a mouse button at the specified coordinates (or current position if None)."""
+        Engine.MoveMouse(x, y, speed)
         mouse.down(button=button)
-        Engine.MouseWait(0)
+
+    @staticmethod
+    def MouseUp(button: str = "left", x: int = None, y: int = None, speed: float = None) -> None:
+        """Release a mouse button at the specified coordinates (or current position if None)."""
+        Engine.MoveMouse(x, y, speed)
         mouse.up(button=button)
 
     @staticmethod
-    def MouseDrag(start_x: int = None, start_y: int = None, end_x: int = None, end_y: int = None, duration: float = 0.0) -> None:
-        """Perform a mouse drag from (start_x, start_y) to (end_x, end_y) over the specified duration."""
-        if start_x is not None and start_y is not None:
-            mouse.move(start_x, start_y)
-        mouse.down()
-        Engine.MouseWait(0)
-        if end_x is not None and end_y is not None:
-            mouse.move(end_x, end_y, duration=duration)
-        Engine.MouseWait(0)
-        mouse.up()
+    def MouseClick(button: str = "left", x: int = None, y: int = None, speed: float = None) -> None:
+        """Perform a MC click at the specified coordinates (or current position if None)."""
+        Engine.MouseDown(button=button, x=x, y=y, speed=speed)
+        Engine.MouseWait()
+        Engine.MouseUp(button=button, x=x, y=y, speed=speed)
+
+    @staticmethod
+    def MouseDrag(start_x: int = None, start_y: int = None, end_x: int = None, end_y: int = None, speed: float = None) -> None:
+        """Perform a MC drag from (start_x, start_y) to (end_x, end_y) over the specified duration."""
+        Engine.MouseDown(x=start_x, y=start_y, speed=speed)
+        Engine.MouseWait()
+        Engine.MouseUp(x=end_x, y=end_y, speed=speed)
 
     @staticmethod
     def KeyPress(key: str) -> None:
         """Press and release a keyboard key with a small randomized delay."""
         keyboard.press(key)
-        Engine.KeyWait(0)
+        Engine.KeyWait()
         keyboard.release(key)
 
     @staticmethod
@@ -77,14 +93,14 @@ class Engine:
         return datetime.datetime.now().timestamp()
     
     @staticmethod
-    def TimeSince(start: float = 0.0) -> float:
+    def TimeSince(start: float = None) -> float:
         """Return the time elapsed since start."""
-        return Engine.CurrentTimeStamp() - start
+        return Engine.CurrentTimeStamp() - (start or 0.0)
     
     @staticmethod
-    def DelayPassed(start: float = 0.0, delay: float = 0.0) -> bool:
+    def DelayPassed(start: float = None, delay: float = None) -> bool:
         """Check if the specified delay has passed since start."""
-        return start <= 0 or delay <= 0 or Engine.TimeSince(start) >= delay
+        return (start or 0.0) <= 0 or (delay or 0.0) <= 0 or Engine.TimeSince(start) >= (delay or 0.0)
     
     @staticmethod
     def Log(message: str, end: str = "\n") -> None:

@@ -1,4 +1,4 @@
-keyboard
 mouse
-pyHM
+keyboard
 PyAutoGUI
+human-mouse
