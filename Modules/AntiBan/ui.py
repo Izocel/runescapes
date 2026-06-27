@@ -48,15 +48,15 @@ class AntiBanUI:
         # -----------------------------
         # ACTION DELAYS
         # -----------------------------
-        ttk.Label(self.frame, text="Camera Delay (ms)").pack(anchor="w")
+        ttk.Label(self.frame, text="Camera Delay (sec.)").pack(anchor="w")
         self.camera_delay = tk.IntVar(value=actions["camera_move"]["delay"])
         ttk.Entry(self.frame, textvariable=self.camera_delay).pack(fill="x", padx=5)
 
-        ttk.Label(self.frame, text="Idle Delay (ms)").pack(anchor="w")
+        ttk.Label(self.frame, text="Idle Delay (sec.)").pack(anchor="w")
         self.idle_delay = tk.IntVar(value=actions["idle_behavior"]["delay"])
         ttk.Entry(self.frame, textvariable=self.idle_delay).pack(fill="x", padx=5)
 
-        ttk.Label(self.frame, text="Active Delay (ms)").pack(anchor="w")
+        ttk.Label(self.frame, text="Active Delay (sec.)").pack(anchor="w")
         self.active_delay = tk.IntVar(value=actions["active_behavior"]["delay"])
         ttk.Entry(self.frame, textvariable=self.active_delay).pack(fill="x", padx=5)
 

@@ -18,12 +18,12 @@ class MiningUI:
         ).pack(pady=5)
 
         # Mining delay
-        ttk.Label(self.frame, text="Mining Delay (ms):").pack(anchor="w")
+        ttk.Label(self.frame, text="Mining Delay (sec.):").pack(anchor="w")
         self.mine_delay = tk.IntVar(value=actions["mine"]["delay"])
         ttk.Entry(self.frame, textvariable=self.mine_delay).pack(fill="x", padx=5)
 
         # Stash delay
-        ttk.Label(self.frame, text="Stash Delay (ms):").pack(anchor="w")
+        ttk.Label(self.frame, text="Stash Delay (sec.):").pack(anchor="w")
         self.stash_delay = tk.IntVar(value=actions["stash"]["delay"])
         ttk.Entry(self.frame, textvariable=self.stash_delay).pack(fill="x", padx=5)
 
