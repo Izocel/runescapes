@@ -3,21 +3,21 @@
     "description": "Automated ore mining task.",
     "runnable": true,
     "configs": {
-        "actions": {
-            "mine": {
+        "actions": [
+            {
+                "name": "mine",
+                "active": true,
                 "type": "mouse",
                 "key": "left",
                 "delay": 25
             },
-            "stash": {
+            {
+                "name": "stash",
+                "active": true,
                 "type": "keyboard",
                 "key": "num 0",
                 "delay": 120
             }
-        },
-        "settings": {
-            "banking": false,
-            "stashing": true
-        }
+        ]
     }
 }

@@ -8,16 +8,11 @@ class MiningTask(Task):
         super().__init__(module_path, configs)
 
         cfg = self.configs
-        actions = cfg["actions"]
-
-        # Build callbacks
-        self.mine_action = lambda: Engine.Action(actions["mine"])
-        self.stash_action = lambda: Engine.Action(actions["stash"])
-
-        # Settings
-        self.stashing = cfg["settings"].get("stashing", True)
+        # Actions are already in the desired order in configs.
+        self.actions = list(cfg["actions"])
 
     # ---------------------------------------------------------
+
     # Lifecycle
     # ---------------------------------------------------------
     def on_start(self):
@@ -30,9 +25,5 @@ class MiningTask(Task):
     # Main Loop
     # ---------------------------------------------------------
     def loop(self):
-        # Mine ore
-        self.mine_action()
-
-        # Stash ore
-        if self.stashing:
-            self.stash_action()
+        for action in self.actions:
+            Engine.Action(action)

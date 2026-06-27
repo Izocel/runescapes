@@ -100,8 +100,11 @@ class Engine:
     
     @staticmethod
     def DelayPassed(start: float = None, delay: float = None) -> bool:
-        """Check if the specified delay has passed since start."""
-        return (start or 0.0) <= 0 or (delay or 0.0) <= 0 or Engine.TimeSince(start) >= (delay or 0.0)
+        """Check if the specified delay has passed since `start`.
+
+        Convention: if `start` is 0/None, treat as "never executed" and allow immediately.
+        """
+        return (start is None) or (start <= 0) or (delay or 0.0) <= 0 or Engine.TimeSince(start) >= (delay or 0.0)
 
     @staticmethod
     def Action(action):
@@ -115,25 +118,62 @@ class Engine:
         """
 
         # Optional delay
-        key = action.get("key")
+        # If delay is set, we should execute action only once per delay window.
         name = action.get("name")
-        type = action.get("type")
+        a_type = action.get("type")
+
+        # --- action-level hold/enable ---
+        # Align with module.json schema: each action can include `active: true/false`.
+        # If missing, default to active.
+        enabled = action.get("active", True)  # primary gating
+
+        # Optional legacy support: allow `enabled: true/false` too.
+        if "enabled" in action:
+            enabled = action.get("enabled", True)
+
+        if not enabled:
+            return
+
+
         delay = action.get("delay")
 
-        if delay:
-            if not Engine.DelayPassed(id(action), float(delay)):
+        # Per-action last-exec tracking (keyed by object identity)
+        last_key = id(action)
+
+        last_exec_map = getattr(Engine, "_last_action_exec", None)
+        if last_exec_map is None:
+            last_exec_map = {}
+            Engine._last_action_exec = last_exec_map
+
+        last_exec = last_exec_map.get(last_key, 0)
+
+        if delay is not None and delay != "":
+            if not Engine.DelayPassed(last_exec, float(delay)):
                 return  # Not ready yet
-            
-        if type == "mouse":
+
+
+        # Execute action.
+        did_execute = False
+        if a_type == "mouse":
             x = action.get("x")
             y = action.get("y")
             speed = action.get("speed")
             Engine.MouseClick(x=x, y=y, speed=speed)
             Logger.Info(f"Mouse action '{name}' executed at ({x}, {y}) with speed {speed}")
-        elif type == "keyboard":
+            did_execute = True
+
+        elif a_type == "keyboard":
+            key = action.get("key")
             Engine.KeyPress(key)
             Logger.Info(f"Keyboard action '{name}' executed")
+            did_execute = True
+
         else:
             Logger.Error(f"Unknown action type '{type}' for action '{name}'")
             return
+
+        # Update last-exec timestamp after successful execution.
+        if did_execute:
+            last_exec_map[last_key] = Engine.CurrentTimeStamp()
+
         

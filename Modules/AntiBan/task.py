@@ -12,6 +12,7 @@ class AntiBanTask(Task):
 
         # Settings
         settings = cfg.get("settings", {})
+        
         self.enabled = settings.get("enabled", True)
         self.humanize_mouse = settings.get("humanize_mouse", True)
         self.humanize_keyboard = settings.get("humanize_keyboard", True)
@@ -22,11 +23,14 @@ class AntiBanTask(Task):
         self.idle_chance = chances["idle"]
         self.active_chance = chances["active"]
 
-        # Actions
+        # Actions (list of objects with `name`)
         actions = cfg["actions"]
-        self.camera_action = lambda: Engine.Action(actions["camera_move"])
-        self.idle_action = lambda: Engine.Action(actions["idle_behavior"])
-        self.active_action = lambda: Engine.Action(actions["active_behavior"])
+        actions_by_name = {a.get("name"): a for a in actions}
+
+        self.camera_action = lambda: Engine.Action(actions_by_name["camera_move"])
+        self.idle_action = lambda: Engine.Action(actions_by_name["idle_behavior"])
+        self.active_action = lambda: Engine.Action(actions_by_name["active_behavior"])
+
 
     def on_start(self):
         Logger.Success("Anti-ban started")
