@@ -2,3 +2,4 @@ mouse
 keyboard
 PyAutoGUI
 human-mouse
+pyHM
