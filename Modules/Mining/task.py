@@ -14,7 +14,6 @@ class MiningTask(Task):
         self.actions = build_basic_actions(cfg.get("actions", []))
 
     # ---------------------------------------------------------
-
     # Lifecycle
     # ---------------------------------------------------------
     def on_start(self):
@@ -29,3 +28,4 @@ class MiningTask(Task):
     def loop(self):
         for action in self.actions:
             Engine.RunAction(action)
+
