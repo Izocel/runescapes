@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from Modules.ModuleUI import ModuleUI
 
+
 class TaskUI(ModuleUI):
     def __init__(self, parent, task):
         super().__init__(parent, task)

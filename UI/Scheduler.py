@@ -9,48 +9,6 @@ import threading
 import time
 
 
-# ---------------------------------------------------------
-# Scrollable Frame
-# ---------------------------------------------------------
-class ScrollableFrame(ttk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent)
-
-        canvas = tk.Canvas(self, highlightthickness=0, bg="#ffffff")
-        scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
-        self.scrollable_frame = ttk.Frame(canvas)
-
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
-        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        self.scrollable_frame.columnconfigure(0, weight=1)
-
-        # Bind scroll events
-        self.bind_scroll(canvas)
-
-    def bind_scroll(self, canvas):
-        # Windows + macOS
-        canvas.bind_all("<MouseWheel>", lambda e: canvas.yview_scroll(int(-e.delta / 120), "units"))
-
-        # Linux scroll up
-        canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))
-
-        # Linux scroll down
-        canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))
-
-
-
-# ---------------------------------------------------------
-# Scheduler UI
-# ---------------------------------------------------------
 class Scheduler(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -61,18 +19,14 @@ class Scheduler(ttk.Frame):
         self.active_module = None
         self.icons = {}
 
-        # Layout rows
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=0)   # top bar
         self.rowconfigure(1, weight=0)   # console
         self.rowconfigure(2, weight=0)   # console buttons
         self.rowconfigure(3, weight=0)   # tabs
         self.rowconfigure(4, weight=0)   # separator
-        self.rowconfigure(5, weight=1)   # scrollable panel
+        self.rowconfigure(5, weight=1)   # module panel
 
-        # ---------------------------------------------------------
-        # LIGHT THEME
-        # ---------------------------------------------------------
         style = ttk.Style()
         style.theme_use("clam")
 
@@ -100,9 +54,6 @@ class Scheduler(ttk.Frame):
         style.configure("TButton", background="#e6e6e6", foreground="#000000", padding=6)
         style.map("TButton", background=[("active", "#d9d9d9")])
 
-        # ---------------------------------------------------------
-        # Top Bar
-        # ---------------------------------------------------------
         topbar = ttk.Frame(self)
         topbar.grid(row=0, column=0, sticky="ew", pady=5, padx=10)
         topbar.columnconfigure(1, weight=1)
@@ -119,9 +70,6 @@ class Scheduler(ttk.Frame):
         self.status = ttk.Label(topbar, text="Status: Idle")
         self.status.grid(row=0, column=2, sticky="e")
 
-        # ---------------------------------------------------------
-        # Console
-        # ---------------------------------------------------------
         console_frame = ttk.LabelFrame(self, text="Console")
         console_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(5, 0))
         console_frame.rowconfigure(0, weight=1)
@@ -150,18 +98,12 @@ class Scheduler(ttk.Frame):
         Logger.copy_callback = self.copy_log
         Logger.gui_clear_callback = self.clear_log
 
-        # ---------------------------------------------------------
-        # Console Buttons (NOW IN ROW 2)
-        # ---------------------------------------------------------
         console_buttons = ttk.Frame(self)
         console_buttons.grid(row=2, column=0, sticky="e", padx=10, pady=(0, 5))
 
         ttk.Button(console_buttons, text="Copy Console", command=self.copy_log).pack(side="right", padx=5)
         ttk.Button(console_buttons, text="Clear Console", command=self.clear_log).pack(side="right")
 
-        # ---------------------------------------------------------
-        # Tabs
-        # ---------------------------------------------------------
         tab_frame = ttk.Frame(self)
         tab_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=(5, 0))
 
@@ -180,24 +122,17 @@ class Scheduler(ttk.Frame):
             btn.pack(side="left", padx=(0, 4))
             self.module_buttons[module_name] = btn
 
-        # ---------------------------------------------------------
-        # Separator
-        # ---------------------------------------------------------
         separator = ttk.Separator(self, orient="horizontal")
         separator.grid(row=4, column=0, sticky="ew")
 
-        # ---------------------------------------------------------
-        # Scrollable Module Panel
-        # ---------------------------------------------------------
-        self.panel_container = ScrollableFrame(self)
+        self.panel_container = ttk.Frame(self)
         self.panel_container.grid(row=5, column=0, sticky="nsew", padx=10, pady=5)
+        self.panel_container.columnconfigure(0, weight=1)
+        self.panel_container.rowconfigure(0, weight=1)
 
         first_module = list(TASK_REGISTRY.keys())[0]
         self.switch_module(first_module)
 
-    # ---------------------------------------------------------
-    # Load icon
-    # ---------------------------------------------------------
     def load_icon(self, module_path):
         icon_path = os.path.join(module_path, "icon.png")
 
@@ -209,14 +144,11 @@ class Scheduler(ttk.Frame):
 
         return None
 
-    # ---------------------------------------------------------
-    # Module Switching
-    # ---------------------------------------------------------
     def switch_module(self, module_name):
         for name, btn in self.module_buttons.items():
             btn.config(style="TabActive.TButton" if name == module_name else "Tab.TButton")
 
-        for widget in self.panel_container.scrollable_frame.winfo_children():
+        for widget in self.panel_container.winfo_children():
             widget.destroy()
 
         self.active_module = module_name
@@ -226,14 +158,10 @@ class Scheduler(ttk.Frame):
 
         UIClass = TASK_UI_REGISTRY.get(module_name)
         if UIClass:
-            self.task_ui = UIClass(self.panel_container.scrollable_frame, self.task)
-            root_widget = self.task_ui.widget()
-            root_widget.pack(fill="x", padx=10, pady=10)
-            root_widget.columnconfigure(0, weight=1)
+            self.task_ui = UIClass(self.panel_container, self.task)
+            widget = self.task_ui.widget()
+            widget.grid(row=0, column=0, sticky="nsew")
 
-    # ---------------------------------------------------------
-    # Logging
-    # ---------------------------------------------------------
     def gui_log(self, msg, tag="INFO"):
         self.log_text.config(state="normal")
         self.log_text.insert("end", msg + "\n", tag)
@@ -250,9 +178,6 @@ class Scheduler(ttk.Frame):
         self.log_text.delete("1.0", "end")
         self.log_text.config(state="disabled")
 
-    # ---------------------------------------------------------
-    # Toggle Start/Stop
-    # ---------------------------------------------------------
     def toggle_module(self):
         if not self.running:
             self.start_module()
@@ -279,9 +204,6 @@ class Scheduler(ttk.Frame):
         self.toggle_btn.config(text="Start")
         self.status.config(text="Status: Idle")
 
-    # ---------------------------------------------------------
-    # Main Loop
-    # ---------------------------------------------------------
     def module_loop(self):
         while self.running and self.task.running:
             self.task.loop_all()
