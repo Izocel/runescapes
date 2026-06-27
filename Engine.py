@@ -3,6 +3,7 @@ import random
 import keyboard
 import datetime
 from pyHM import mouse
+from Logger import Logger
 from human_mouse import MouseController
 
 MC = MouseController(always_zigzag=True)
@@ -107,25 +108,32 @@ class Engine:
         """
         Executes a generic action defined in module.json.
         Supports:
-            - type: "mouse", "keyboard"
+            - name: string
             - key: string
+            - type: "mouse", "keyboard"
             - delay: optional (seconds)
         """
 
         # Optional delay
+        key = action.get("key")
+        name = action.get("name")
+        type = action.get("type")
         delay = action.get("delay")
+
         if delay:
             if not Engine.DelayPassed(id(action), float(delay)):
                 return  # Not ready yet
-
-        a_type = action.get("type")
-        key = action.get("key")
-
-        if a_type == "mouse":
-            Engine.MouseClick(key)
-
-        elif a_type == "keyboard":
+            
+        if type == "mouse":
+            x = action.get("x")
+            y = action.get("y")
+            speed = action.get("speed")
+            Engine.MouseClick(x=x, y=y, speed=speed)
+            Logger.Info(f"Mouse action '{name}' executed at ({x}, {y}) with speed {speed}")
+        elif type == "keyboard":
             Engine.KeyPress(key)
-
+            Logger.Info(f"Keyboard action '{name}' executed")
         else:
-            raise ValueError(f"Unknown action type: {a_type}")
+            Logger.Error(f"Unknown action type '{type}' for action '{name}'")
+            return
+        

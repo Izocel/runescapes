@@ -115,10 +115,10 @@ class Scheduler(ttk.Frame):
         console_buttons = ttk.Frame(self)
         console_buttons.grid(row=2, column=0, sticky="e", padx=10, pady=(0, 5))
 
-        ttk.Button(console_buttons, text="Copy Console", command=self.copy_log).pack(
+        ttk.Button(console_buttons, text="Copy Console", command=Logger.Copy).pack(
             side="right", padx=5
         )
-        ttk.Button(console_buttons, text="Clear Console", command=self.clear_log).pack(
+        ttk.Button(console_buttons, text="Clear Console", command=Logger.Clear).pack(
             side="right"
         )
 
@@ -272,14 +272,11 @@ class Scheduler(ttk.Frame):
 
     def start_module(self, module_name):
         if not self.runnable:
-            self.gui_log("This module cannot be started (settings-only).", "ERROR")
+            Logger.Error(f"Module {module_name} cannot be started (settings-only).")
             return
 
         if self.currently_running_module and self.currently_running_module != module_name:
-            self.gui_log(
-                f"Only one module can run at a time. Stop '{self.currently_running_module}' first.",
-                "ERROR",
-            )
+            Logger.Error(f"Only one module can run at a time. Stop '{self.currently_running_module}' first.")
             return
 
         if self.module_running.get(module_name, False):
@@ -329,5 +326,4 @@ class Scheduler(ttk.Frame):
     def module_loop(self, module_name, task):
         while self.module_running.get(module_name, False) and task.running:
             task.loop_all()
-            time.sleep(0.05)
 

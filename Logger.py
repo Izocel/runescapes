@@ -27,7 +27,7 @@ class Logger:
     def Copy():
         if Logger.copy_callback:
             Logger.copy_callback()
-            Logger.Success("-------- Log Copied to Clipboard --------")
+            Logger.Info("-------- Log Copied to Clipboard --------")
 
     @staticmethod
     def Info(msg): Logger._log(msg, "INFO")
