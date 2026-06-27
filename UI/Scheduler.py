@@ -33,17 +33,19 @@ class ScrollableFrame(ttk.Frame):
 
         self.scrollable_frame.columnconfigure(0, weight=1)
 
-        self.scrollable_frame.bind(
-            "<Enter>",
-            lambda e: canvas.bind_all(
-                "<MouseWheel>",
-                lambda ev: canvas.yview_scroll(int(-ev.delta / 120), "units")
-            )
-        )
-        self.scrollable_frame.bind(
-            "<Leave>",
-            lambda e: canvas.unbind_all("<MouseWheel>")
-        )
+        # Bind scroll events
+        self.bind_scroll(canvas)
+
+    def bind_scroll(self, canvas):
+        # Windows + macOS
+        canvas.bind_all("<MouseWheel>", lambda e: canvas.yview_scroll(int(-e.delta / 120), "units"))
+
+        # Linux scroll up
+        canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))
+
+        # Linux scroll down
+        canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))
+
 
 
 # ---------------------------------------------------------
