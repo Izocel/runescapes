@@ -3,3 +3,4 @@ keyboard
 PyAutoGUI
 human-mouse
 pyHM
+Pillow

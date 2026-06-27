@@ -3,7 +3,6 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 import os
 import threading
-import time
 
 from Modules.loader import TASK_REGISTRY, TASK_UI_REGISTRY
 from Logger import Logger
