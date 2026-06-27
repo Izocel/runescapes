@@ -2,6 +2,7 @@ import random
 from Tasks.Task import Task
 from Logger import Logger
 from Engine import Engine
+from ActionBuilder import build_basic_actions
 
 
 class AntiBanTask(Task):
@@ -10,27 +11,25 @@ class AntiBanTask(Task):
 
         cfg = self.configs
 
-        # Settings
+        # Settings (driven by UI + module.json)
         settings = cfg.get("settings", {})
-        
-        self.enabled = settings.get("enabled", True)
+
+        self.enable = settings.get("enable", False)
         self.humanize_mouse = settings.get("humanize_mouse", True)
         self.humanize_keyboard = settings.get("humanize_keyboard", True)
 
-        # Chances
-        chances = cfg["chances"]
-        self.camera_chance = chances["camera"]
-        self.idle_chance = chances["idle"]
-        self.active_chance = chances["active"]
+        self.camera_chance = settings.get("camera_chance", 50)
+        self.idle_chance = settings.get("idle_chance", 30)
+        self.active_chance = settings.get("active_chance", 20)
 
-        # Actions (list of objects with `name`)
-        actions = cfg["actions"]
-        actions_by_name = {a.get("name"): a for a in actions}
+        self.camera_delay = settings.get("camera_delay", 8)
+        self.idle_delay = settings.get("idle_delay", 3)
+        self.active_delay = settings.get("active_delay", 15)
 
-        self.camera_action = lambda: Engine.Action(actions_by_name["camera_move"])
-        self.idle_action = lambda: Engine.Action(actions_by_name["idle_behavior"])
-        self.active_action = lambda: Engine.Action(actions_by_name["active_behavior"])
+        self.actions = build_basic_actions(cfg.get("actions", []))
 
+        # Simple throttling state
+        self._last_run_ts = 0.0
 
     def on_start(self):
         Logger.Success("Anti-ban started")
@@ -39,17 +38,28 @@ class AntiBanTask(Task):
         Logger.Error("Anti-ban stopped")
 
     def loop(self):
-        if not self.enabled:
+        if not self.enable:
             return
 
-        if random.random() < self.camera_chance and self.humanize_mouse:
-            Logger.Action("Anti-ban: camera movement")
-            self.camera_action()
+        # Throttle actions so delay settings have effect.
+        # Since we don't have a real state machine from Engine here,
+        # we approximate with: if any Engine action executes, treat as active.
+        import time
 
-        if random.random() < self.idle_chance:
-            Logger.Action("Anti-ban: idle behavior")
-            self.idle_action()
+        now = time.time()
+        if self._last_run_ts and (now - self._last_run_ts) < (self.active_delay / 1.0):
+            return
 
-        if random.random() < self.active_chance and self.humanize_keyboard:
-            Logger.Action("Anti-ban: active behavior")
-            self.active_action()
+        for action in self.actions:
+            chance = getattr(action, "chance", 1.0)
+            if random.random() <= chance:
+                # Additional gate based on chance sliders.
+                # camera_move actions are treated as camera chances.
+                name = getattr(action, "name", "")
+                if name == "camera_move":
+                    if random.randint(1, 100) > int(self.camera_chance):
+                        continue
+
+                Engine.RunAction(action)
+                self._last_run_ts = now
+

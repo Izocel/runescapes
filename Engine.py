@@ -107,73 +107,87 @@ class Engine:
         return (start is None) or (start <= 0) or (delay or 0.0) <= 0 or Engine.TimeSince(start) >= (delay or 0.0)
 
     @staticmethod
-    def Action(action):
-        """
-        Executes a generic action defined in module.json.
-        Supports:
-            - name: string
-            - key: string
-            - type: "mouse", "keyboard"
-            - delay: optional (seconds)
-        """
+    def ShouldRunActionPayload(action) -> bool:
+        """Return True if action should run right now (action gating only)."""
+        if not action.active:
+            return False
 
-        # Optional delay
-        # If delay is set, we should execute action only once per delay window.
-        name = action.get("name")
-        a_type = action.get("type")
+        delay = action.delay
+        last_exec = action.lastExec or 0
 
-        # --- action-level hold/enable ---
-        # Align with module.json schema: each action can include `active: true/false`.
-        # If missing, default to active.
-        enabled = action.get("active", True)  # primary gating
-
-        # Optional legacy support: allow `enabled: true/false` too.
-        if "enabled" in action:
-            enabled = action.get("enabled", True)
-
-        if not enabled:
-            return
-
-
-        delay = action.get("delay")
-
-        # Per-action last-exec tracking (keyed by object identity)
-        last_key = id(action)
-
-        last_exec_map = getattr(Engine, "_last_action_exec", None)
-        if last_exec_map is None:
-            last_exec_map = {}
-            Engine._last_action_exec = last_exec_map
-
-        last_exec = last_exec_map.get(last_key, 0)
-
+        # delay gating
         if delay is not None and delay != "":
-            if not Engine.DelayPassed(last_exec, float(delay)):
-                return  # Not ready yet
+            return Engine.DelayPassed(last_exec, float(delay))
 
+        return True
 
-        # Execute action.
-        did_execute = False
+    @staticmethod
+    def RunActionPayload(action) -> bool:
+        """Execute the concrete action payload. Returns whether something executed."""
+        name = action.name
+        a_type = action.type
+
         if a_type == "mouse":
-            x = action.get("x")
-            y = action.get("y")
-            speed = action.get("speed")
+            x = action.x
+            y = action.y
+            speed = action.speed
             Engine.MouseClick(x=x, y=y, speed=speed)
-            Logger.Info(f"Mouse action '{name}' executed at ({x}, {y}) with speed {speed}")
-            did_execute = True
+            Logger.Info(
+                f"Mouse action '{name}' executed at ({x}, {y}) with speed {speed}"
+            )
+            return True
 
-        elif a_type == "keyboard":
-            key = action.get("key")
+        if a_type == "keyboard":
+            key = action.key
             Engine.KeyPress(key)
             Logger.Info(f"Keyboard action '{name}' executed")
-            did_execute = True
+            return True
 
+        if a_type == "delay":
+            # For delay actions, action.delay is the sleep duration.
+            delay_val = action.delay
+            if delay_val is not None and delay_val != "":
+                try:
+                    Engine.Sleep(float(delay_val))
+                except Exception:
+                    Logger.Error(
+                        f"Delay action '{name}' has invalid delay: {delay_val}"
+                    )
+                    return False
+            return True
+
+        Logger.Error(f"Unknown action type '{a_type}' for action '{name}'")
+        return False
+
+    @staticmethod
+    def UpdateAction(action) -> None:
+        """Update action.lastExec / action.nextExec after a successful execution."""
+        delay = action.delay
+        now = Engine.CurrentTimeStamp()
+        action.lastExec = now
+
+        if delay is not None and delay != "":
+            try:
+                action.nextExec = now + float(delay)
+            except Exception:
+                action.nextExec = None
         else:
-            Logger.Error(f"Unknown action type '{type}' for action '{name}'")
+            # keep existing value (or None)
+            action.nextExec = action.nextExec
+
+    @staticmethod
+    def RunAction(action) -> None:
+        """Execute a BasicAction (segmented into gating, execution, timestamp update)."""
+        if not Engine.ShouldRunActionPayload(action):
             return
 
-        # Update last-exec timestamp after successful execution.
+        did_execute = Engine.RunActionPayload(action)
         if did_execute:
-            last_exec_map[last_key] = Engine.CurrentTimeStamp()
+            Engine.UpdateAction(action)
+
+
+
+
+
 
         
