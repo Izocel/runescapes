@@ -3,7 +3,7 @@ import os
 import json
 
 class Task(ABC):
-    def __init__(self, module_path=None):
+    def __init__(self, module_path=None, configs=None):
         self.running = False
         self.subtasks = []
         self.state = "idle"
@@ -13,8 +13,13 @@ class Task(ABC):
         self.module_info = {}
         self.configs = {}
 
+        # Load configs from module.json
         if module_path:
             self.load_configs()
+
+        # Override with configs passed from loader/scheduler
+        if configs is not None:
+            self.configs = configs
 
     # ---------------------------------------------------------
     # Config loading / saving

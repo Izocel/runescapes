@@ -4,8 +4,8 @@ from Modules.ModuleUI import ModuleUI
 
 
 class TaskUI(ModuleUI):
-    def __init__(self, parent, task):
-        super().__init__(parent, task)
+    def __init__(self, parent, task, configs):
+        super().__init__(parent, task, configs)
 
         settings = ttk.LabelFrame(self.frame, text="Mining Settings")
         settings.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)

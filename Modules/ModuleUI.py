@@ -3,9 +3,10 @@ from tkinter import ttk
 
 
 class ModuleUI:
-    def __init__(self, parent, task):
+    def __init__(self, parent, task, configs):
         self.parent = parent
         self.task = task
+        self.configs = configs  # <-- NEW: module.json configs
 
         # Text widget handles scrolling natively
         self.text = tk.Text(

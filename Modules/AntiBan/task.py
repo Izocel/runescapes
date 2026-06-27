@@ -5,8 +5,8 @@ from Engine import Engine
 
 
 class AntiBanTask(Task):
-    def __init__(self, module_path):
-        super().__init__(module_path)
+    def __init__(self, module_path, configs=None):
+        super().__init__(module_path, configs)
 
         cfg = self.configs
 

@@ -1,6 +1,7 @@
 {
     "name": "Mining",
     "description": "Automated ore mining task.",
+    "runnable": true,
     "configs": {
         "actions": {
             "mine": {

@@ -7,7 +7,7 @@ from Tasks.Task import Task
 
 MODULES_PATH = os.path.dirname(__file__)
 
-TASK_REGISTRY = {}        # { "Mining": (TaskClass, module_dir) }
+TASK_REGISTRY = {}        # { "Mining": { "task": TaskClass, "path": dir, "runnable": bool, "configs": {...}, "description": str } }
 TASK_UI_REGISTRY = {}     # { "Mining": UIClass }
 MODULE_INFO = {}          # Raw module.json data
 
@@ -44,7 +44,11 @@ def load_modules():
             continue
 
         MODULE_INFO[folder] = info
+
         display_name = info.get("name", folder)
+        runnable = info.get("runnable", True)
+        description = info.get("description", "")
+        configs = info.get("configs", {})
 
         # ---------------------------------------------------------
         # Load task.py
@@ -94,7 +98,13 @@ def load_modules():
         # ---------------------------------------------------------
         # Register module
         # ---------------------------------------------------------
-        TASK_REGISTRY[display_name] = (TaskClass, module_dir)
+        TASK_REGISTRY[display_name] = {
+            "task": TaskClass,
+            "path": module_dir,
+            "runnable": runnable,
+            "description": description,
+            "configs": configs
+        }
 
         if UIClass:
             TASK_UI_REGISTRY[display_name] = UIClass

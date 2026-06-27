@@ -1,6 +1,7 @@
 {
     "name": "Anti-Ban",
     "description": "Human-like anti-ban behavior.",
+    "runnable": false,
     "configs": {
         "actions": {
             "camera_move": {
