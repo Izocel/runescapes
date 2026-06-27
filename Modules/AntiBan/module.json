@@ -22,6 +22,11 @@
             "camera": 0.01,
             "idle": 0.05,
             "active": 0.02
+        },
+        "settings": {
+            "enabled": true,
+            "humanize_mouse": true,
+            "humanize_keyboard": true
         }
     }
 }
