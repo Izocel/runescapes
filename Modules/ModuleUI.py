@@ -41,7 +41,11 @@ class ModuleUI:
             # Windows: event.delta is typically a multiple of 120
             self._canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
-        self._canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        # Important: bind/unbind on enter/leave so only the active tab's
+        # module is scrollable.
+        self._canvas.bind("<Enter>", lambda e: self._canvas.bind_all("<MouseWheel>", _on_mousewheel))
+        self._canvas.bind("<Leave>", lambda e: self._canvas.unbind_all("<MouseWheel>"))
+
 
 
         # Inner frame that holds actual module widgets
