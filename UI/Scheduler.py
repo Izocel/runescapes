@@ -60,8 +60,11 @@ class Scheduler(ttk.Frame):
 
         # Responsive layout
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(2, weight=0)
-        self.rowconfigure(3, weight=1)
+        self.rowconfigure(0, weight=0)   # top bar
+        self.rowconfigure(1, weight=0)   # console
+        self.rowconfigure(2, weight=0)   # tabs
+        self.rowconfigure(3, weight=0)   # separator
+        self.rowconfigure(4, weight=1)   # scrollable panel
 
         # ---------------------------------------------------------
         # LIGHT THEME
@@ -147,7 +150,7 @@ class Scheduler(ttk.Frame):
         Logger.gui_clear_callback = self.clear_log
 
         # ---------------------------------------------------------
-        # Module Tabs
+        # Module Tabs (row 2)
         # ---------------------------------------------------------
         tab_frame = ttk.Frame(self)
         tab_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=(5, 0))
@@ -164,18 +167,20 @@ class Scheduler(ttk.Frame):
                 style="Tab.TButton",
                 command=lambda m=module_name: self.switch_module(m)
             )
-            btn.pack(side="left", padx=(0, 2))
+            btn.pack(side="left", padx=(0, 4))
             self.module_buttons[module_name] = btn
 
-        # Separator under tabs
+        # ---------------------------------------------------------
+        # Separator (row 3)
+        # ---------------------------------------------------------
         separator = ttk.Separator(self, orient="horizontal")
-        separator.grid(row=2, column=0, sticky="ew", pady=(40, 0))
+        separator.grid(row=3, column=0, sticky="ew")
 
         # ---------------------------------------------------------
-        # Scrollable Module Panel
+        # Scrollable Module Panel (row 4)
         # ---------------------------------------------------------
         self.panel_container = ScrollableFrame(self)
-        self.panel_container.grid(row=3, column=0, sticky="nsew", padx=10, pady=5)
+        self.panel_container.grid(row=4, column=0, sticky="nsew", padx=10, pady=5)
 
         # Load first module
         first_module = list(TASK_REGISTRY.keys())[0]
@@ -247,7 +252,7 @@ class Scheduler(ttk.Frame):
         self.running = True
 
         self.toggle_btn.config(text="Stop")
-        self.status.config(text=f"Status: Module Running ({self.active_module})")
+        self.status.config(text=f"Status: Running")
 
         threading.Thread(target=self.module_loop, daemon=True).start()
 
