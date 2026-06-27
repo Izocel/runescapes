@@ -8,7 +8,7 @@
             "name": "Debug",
             "type": "debugpy",
             "request": "launch",
-            "program": "main.py",
+            "program": "App.py",
             "console": "integratedTerminal"
         },
         {

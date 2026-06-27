@@ -1,0 +1,27 @@
+{
+    "name": "Anti-Ban",
+    "description": "Human-like anti-ban behavior.",
+    "configs": {
+        "actions": {
+            "camera_move": {
+                "type": "mouse",
+                "key": "move_random",
+                "delay": 8
+            },
+            "idle_behavior": {
+                "type": "delay",
+                "delay": 3
+            },
+            "active_behavior": {
+                "type": "keyboard",
+                "key": "space",
+                "delay": 15
+            }
+        },
+        "chances": {
+            "camera": 0.01,
+            "idle": 0.05,
+            "active": 0.02
+        }
+    }
+}

@@ -101,14 +101,31 @@ class Engine:
     def DelayPassed(start: float = None, delay: float = None) -> bool:
         """Check if the specified delay has passed since start."""
         return (start or 0.0) <= 0 or (delay or 0.0) <= 0 or Engine.TimeSince(start) >= (delay or 0.0)
-    
-    @staticmethod
-    def Log(message: str, end: str = "\n") -> None:
-        """Print a log message with a timestamp including nanosecond precision."""
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]  # Format with milliseconds
-        print(f"[{timestamp}] {message}", end=end)
 
     @staticmethod
-    def ClearConsole() -> None:
-        """Clear the console for better readability."""
-        Engine.Log("\033c", end="")
+    def Action(action):
+        """
+        Executes a generic action defined in module.json.
+        Supports:
+            - type: "mouse", "keyboard"
+            - key: string
+            - delay: optional (seconds)
+        """
+
+        # Optional delay
+        delay = action.get("delay")
+        if delay:
+            if not Engine.DelayPassed(id(action), float(delay)):
+                return  # Not ready yet
+
+        a_type = action.get("type")
+        key = action.get("key")
+
+        if a_type == "mouse":
+            Engine.MouseClick(key)
+
+        elif a_type == "keyboard":
+            Engine.KeyPress(key)
+
+        else:
+            raise ValueError(f"Unknown action type: {a_type}")

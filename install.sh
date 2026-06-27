@@ -1,1 +1,1 @@
-pip install -r deps.txt
+pip install -r deps.txt --upgrade

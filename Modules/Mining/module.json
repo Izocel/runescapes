@@ -1,0 +1,22 @@
+{
+    "name": "Mining",
+    "description": "Automated ore mining task.",
+    "configs": {
+        "actions": {
+            "mine": {
+                "type": "mouse",
+                "key": "left",
+                "delay": 25
+            },
+            "stash": {
+                "type": "keyboard",
+                "key": "num 0",
+                "delay": 120
+            }
+        },
+        "settings": {
+            "banking": false,
+            "stashing": true
+        }
+    }
+}
