@@ -31,10 +31,8 @@ class ScrollableFrame(ttk.Frame):
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        # Allow module widgets to expand horizontally
         self.scrollable_frame.columnconfigure(0, weight=1)
 
-        # Mousewheel scrolling
         self.scrollable_frame.bind(
             "<Enter>",
             lambda e: canvas.bind_all(
@@ -65,9 +63,10 @@ class Scheduler(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=0)   # top bar
         self.rowconfigure(1, weight=0)   # console
-        self.rowconfigure(2, weight=0)   # tabs
-        self.rowconfigure(3, weight=0)   # separator
-        self.rowconfigure(4, weight=1)   # scrollable panel
+        self.rowconfigure(2, weight=0)   # console buttons
+        self.rowconfigure(3, weight=0)   # tabs
+        self.rowconfigure(4, weight=0)   # separator
+        self.rowconfigure(5, weight=1)   # scrollable panel
 
         # ---------------------------------------------------------
         # LIGHT THEME
@@ -75,7 +74,6 @@ class Scheduler(ttk.Frame):
         style = ttk.Style()
         style.theme_use("clam")
 
-        # TAB STYLING
         style.configure("Tab.TButton",
                         background="#e6e6e6",
                         foreground="#000000",
@@ -92,7 +90,6 @@ class Scheduler(ttk.Frame):
                         relief="flat",
                         borderwidth=1)
 
-        # General theme
         style.configure(".", background="#f2f2f2", foreground="#000000")
         style.configure("TFrame", background="#f2f2f2")
         style.configure("TLabelframe", background="#f2f2f2", foreground="#000000")
@@ -124,7 +121,7 @@ class Scheduler(ttk.Frame):
         # Console
         # ---------------------------------------------------------
         console_frame = ttk.LabelFrame(self, text="Console")
-        console_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
+        console_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(5, 0))
         console_frame.rowconfigure(0, weight=1)
         console_frame.columnconfigure(0, weight=1)
 
@@ -136,11 +133,11 @@ class Scheduler(ttk.Frame):
             insertbackground="black",
             wrap="word",
             borderwidth=1,
-            highlightthickness=0
+            highlightthickness=0,
+            state="disabled"
         )
         self.log_text.grid(row=0, column=0, sticky="nsew")
 
-        # Log tags
         self.log_text.tag_config("INFO", foreground="#000000")
         self.log_text.tag_config("ACTION", foreground="#007acc")
         self.log_text.tag_config("ERROR", foreground="#cc0000")
@@ -152,10 +149,19 @@ class Scheduler(ttk.Frame):
         Logger.gui_clear_callback = self.clear_log
 
         # ---------------------------------------------------------
+        # Console Buttons (NOW IN ROW 2)
+        # ---------------------------------------------------------
+        console_buttons = ttk.Frame(self)
+        console_buttons.grid(row=2, column=0, sticky="e", padx=10, pady=(0, 5))
+
+        ttk.Button(console_buttons, text="Copy Console", command=self.copy_log).pack(side="right", padx=5)
+        ttk.Button(console_buttons, text="Clear Console", command=self.clear_log).pack(side="right")
+
+        # ---------------------------------------------------------
         # Tabs
         # ---------------------------------------------------------
         tab_frame = ttk.Frame(self)
-        tab_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=(5, 0))
+        tab_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=(5, 0))
 
         self.module_buttons = {}
 
@@ -176,15 +182,14 @@ class Scheduler(ttk.Frame):
         # Separator
         # ---------------------------------------------------------
         separator = ttk.Separator(self, orient="horizontal")
-        separator.grid(row=3, column=0, sticky="ew")
+        separator.grid(row=4, column=0, sticky="ew")
 
         # ---------------------------------------------------------
         # Scrollable Module Panel
         # ---------------------------------------------------------
         self.panel_container = ScrollableFrame(self)
-        self.panel_container.grid(row=4, column=0, sticky="nsew", padx=10, pady=5)
+        self.panel_container.grid(row=5, column=0, sticky="nsew", padx=10, pady=5)
 
-        # Load first module
         first_module = list(TASK_REGISTRY.keys())[0]
         self.switch_module(first_module)
 
@@ -228,7 +233,9 @@ class Scheduler(ttk.Frame):
     # Logging
     # ---------------------------------------------------------
     def gui_log(self, msg, tag="INFO"):
+        self.log_text.config(state="normal")
         self.log_text.insert("end", msg + "\n", tag)
+        self.log_text.config(state="disabled")
         self.log_text.see("end")
 
     def copy_log(self):
@@ -237,7 +244,9 @@ class Scheduler(ttk.Frame):
         self.clipboard_append(text)
 
     def clear_log(self):
+        self.log_text.config(state="normal")
         self.log_text.delete("1.0", "end")
+        self.log_text.config(state="disabled")
 
     # ---------------------------------------------------------
     # Toggle Start/Stop
@@ -266,7 +275,7 @@ class Scheduler(ttk.Frame):
             self.task.stop()
 
         self.toggle_btn.config(text="Start")
-        self.status.config(text="Status: Stopped")
+        self.status.config(text="Status: Idle")
 
     # ---------------------------------------------------------
     # Main Loop
