@@ -1,85 +1,69 @@
 import tkinter as tk
 from tkinter import ttk
+from Modules.ModuleUI import ModuleUI
 
-
-class AntiBanUI:
+class TaskUI(ModuleUI):
     def __init__(self, parent, task):
-        self.task = task
-        self.frame = ttk.Frame(parent)
+        super().__init__(parent, task)
 
-        cfg = task.configs
-        actions = cfg["actions"]
-        chances = cfg["chances"]
-        settings = cfg["settings"]
+        settings = ttk.LabelFrame(self.frame, text="Anti-Ban Settings")
+        settings.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        settings.columnconfigure(0, weight=1)
 
-        ttk.Label(
-            self.frame,
-            text="Anti-Ban Settings",
-            font=("Segoe UI", 10, "bold")
-        ).pack(pady=5)
+        self.enable_var = tk.BooleanVar(value=True)
+        self.mouse_var = tk.BooleanVar(value=True)
+        self.keyboard_var = tk.BooleanVar(value=True)
 
-        # -----------------------------
-        # SETTINGS
-        # -----------------------------
-        self.enabled = tk.BooleanVar(value=settings.get("enabled", True))
-        ttk.Checkbutton(self.frame, text="Enable Anti-Ban", variable=self.enabled).pack(anchor="w")
+        ttk.Checkbutton(settings, text="Enable Anti-Ban",
+                        variable=self.enable_var).grid(row=0, column=0, sticky="w", pady=2)
+        ttk.Checkbutton(settings, text="Humanize Mouse",
+                        variable=self.mouse_var).grid(row=1, column=0, sticky="w", pady=2)
+        ttk.Checkbutton(settings, text="Humanize Keyboard",
+                        variable=self.keyboard_var).grid(row=2, column=0, sticky="w", pady=2)
 
-        self.humanize_mouse = tk.BooleanVar(value=settings.get("humanize_mouse", True))
-        ttk.Checkbutton(self.frame, text="Humanize Mouse", variable=self.humanize_mouse).pack(anchor="w")
+        self.camera_chance = tk.IntVar(value=50)
+        self.idle_chance = tk.IntVar(value=30)
+        self.active_chance = tk.IntVar(value=20)
 
-        self.humanize_keyboard = tk.BooleanVar(value=settings.get("humanize_keyboard", True))
-        ttk.Checkbutton(self.frame, text="Humanize Keyboard", variable=self.humanize_keyboard).pack(anchor="w")
+        ttk.Label(settings, text="Camera Chance").grid(row=3, column=0, sticky="w")
+        ttk.Scale(settings, from_=0, to=100,
+                  orient="horizontal",
+                  variable=self.camera_chance).grid(row=4, column=0, sticky="ew", pady=3)
 
-        # -----------------------------
-        # CHANCES
-        # -----------------------------
-        ttk.Label(self.frame, text="Camera Chance").pack(anchor="w")
-        self.camera_chance = tk.DoubleVar(value=chances["camera"])
-        ttk.Scale(self.frame, from_=0.0, to=1.0, variable=self.camera_chance).pack(fill="x", padx=5)
+        ttk.Label(settings, text="Idle Chance").grid(row=5, column=0, sticky="w")
+        ttk.Scale(settings, from_=0, to=100,
+                  orient="horizontal",
+                  variable=self.idle_chance).grid(row=6, column=0, sticky="ew", pady=3)
 
-        ttk.Label(self.frame, text="Idle Chance").pack(anchor="w")
-        self.idle_chance = tk.DoubleVar(value=chances["idle"])
-        ttk.Scale(self.frame, from_=0.0, to=1.0, variable=self.idle_chance).pack(fill="x", padx=5)
+        ttk.Label(settings, text="Active Chance").grid(row=7, column=0, sticky="w")
+        ttk.Scale(settings, from_=0, to=100,
+                  orient="horizontal",
+                  variable=self.active_chance).grid(row=8, column=0, sticky="ew", pady=3)
 
-        ttk.Label(self.frame, text="Active Chance").pack(anchor="w")
-        self.active_chance = tk.DoubleVar(value=chances["active"])
-        ttk.Scale(self.frame, from_=0.0, to=1.0, variable=self.active_chance).pack(fill="x", padx=5)
+        delays = ttk.LabelFrame(self.frame, text="Delays")
+        delays.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
+        delays.columnconfigure(1, weight=1)
 
-        # -----------------------------
-        # ACTION DELAYS
-        # -----------------------------
-        ttk.Label(self.frame, text="Camera Delay (sec.)").pack(anchor="w")
-        self.camera_delay = tk.IntVar(value=actions["camera_move"]["delay"])
-        ttk.Entry(self.frame, textvariable=self.camera_delay).pack(fill="x", padx=5)
+        self.camera_delay = tk.IntVar(value=8)
+        self.idle_delay = tk.IntVar(value=3)
+        self.active_delay = tk.IntVar(value=15)
 
-        ttk.Label(self.frame, text="Idle Delay (sec.)").pack(anchor="w")
-        self.idle_delay = tk.IntVar(value=actions["idle_behavior"]["delay"])
-        ttk.Entry(self.frame, textvariable=self.idle_delay).pack(fill="x", padx=5)
+        ttk.Label(delays, text="Camera Delay (sec.):").grid(row=0, column=0, sticky="w", pady=2)
+        ttk.Entry(delays, textvariable=self.camera_delay, width=6).grid(row=0, column=1, sticky="w")
 
-        ttk.Label(self.frame, text="Active Delay (sec.)").pack(anchor="w")
-        self.active_delay = tk.IntVar(value=actions["active_behavior"]["delay"])
-        ttk.Entry(self.frame, textvariable=self.active_delay).pack(fill="x", padx=5)
+        ttk.Label(delays, text="Idle Delay (sec.):").grid(row=1, column=0, sticky="w", pady=2)
+        ttk.Entry(delays, textvariable=self.idle_delay, width=6).grid(row=1, column=1, sticky="w")
+
+        ttk.Label(delays, text="Active Delay (sec.):").grid(row=2, column=0, sticky="w", pady=2)
+        ttk.Entry(delays, textvariable=self.active_delay, width=6).grid(row=2, column=1, sticky="w")
 
     def apply(self):
-        cfg = self.task.configs
-
-        # SETTINGS
-        cfg["settings"]["enabled"] = self.enabled.get()
-        cfg["settings"]["humanize_mouse"] = self.humanize_mouse.get()
-        cfg["settings"]["humanize_keyboard"] = self.humanize_keyboard.get()
-
-        # CHANCES
-        cfg["chances"]["camera"] = self.camera_chance.get()
-        cfg["chances"]["idle"] = self.idle_chance.get()
-        cfg["chances"]["active"] = self.active_chance.get()
-
-        # ACTION DELAYS
-        cfg["actions"]["camera_move"]["delay"] = self.camera_delay.get()
-        cfg["actions"]["idle_behavior"]["delay"] = self.idle_delay.get()
-        cfg["actions"]["active_behavior"]["delay"] = self.active_delay.get()
-
-        self.task.save_configs()
-        self.task.__init__(self.task.module_path)
-
-    def widget(self):
-        return self.frame
+        self.task.enable = self.enable_var.get()
+        self.task.humanize_mouse = self.mouse_var.get()
+        self.task.humanize_keyboard = self.keyboard_var.get()
+        self.task.camera_chance = self.camera_chance.get()
+        self.task.idle_chance = self.idle_chance.get()
+        self.task.active_chance = self.active_chance.get()
+        self.task.camera_delay = self.camera_delay.get()
+        self.task.idle_delay = self.idle_delay.get()
+        self.task.active_delay = self.active_delay.get()

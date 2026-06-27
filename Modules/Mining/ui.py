@@ -1,54 +1,29 @@
 import tkinter as tk
 from tkinter import ttk
+from Modules.ModuleUI import ModuleUI
 
-
-class MiningUI:
+class TaskUI(ModuleUI):
     def __init__(self, parent, task):
-        self.task = task
-        self.frame = ttk.Frame(parent)
+        super().__init__(parent, task)
 
-        cfg = task.configs
-        actions = cfg["actions"]
-        settings = cfg["settings"]
+        settings = ttk.LabelFrame(self.frame, text="Mining Settings")
+        settings.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        settings.columnconfigure(1, weight=1)
 
-        ttk.Label(
-            self.frame,
-            text="Mining Settings",
-            font=("Segoe UI", 10, "bold")
-        ).pack(pady=5)
+        self.mining_delay = tk.IntVar(value=25)
+        self.stash_delay = tk.IntVar(value=120)
+        self.enable_stash = tk.BooleanVar(value=True)
 
-        # Mining delay
-        ttk.Label(self.frame, text="Mining Delay (sec.):").pack(anchor="w")
-        self.mine_delay = tk.IntVar(value=actions["mine"]["delay"])
-        ttk.Entry(self.frame, textvariable=self.mine_delay).pack(fill="x", padx=5)
+        ttk.Label(settings, text="Mining Delay (sec.):").grid(row=0, column=0, sticky="w", pady=2)
+        ttk.Entry(settings, textvariable=self.mining_delay, width=6).grid(row=0, column=1, sticky="w")
 
-        # Stash delay
-        ttk.Label(self.frame, text="Stash Delay (sec.):").pack(anchor="w")
-        self.stash_delay = tk.IntVar(value=actions["stash"]["delay"])
-        ttk.Entry(self.frame, textvariable=self.stash_delay).pack(fill="x", padx=5)
+        ttk.Label(settings, text="Stash Delay (sec.):").grid(row=1, column=0, sticky="w", pady=2)
+        ttk.Entry(settings, textvariable=self.stash_delay, width=6).grid(row=1, column=1, sticky="w")
 
-        # Stashing toggle
-        self.stashing_var = tk.BooleanVar(value=settings.get("stashing", True))
-        ttk.Checkbutton(
-            self.frame,
-            text="Enable Stashing",
-            variable=self.stashing_var
-        ).pack(anchor="w", padx=5, pady=5)
+        ttk.Checkbutton(settings, text="Enable Stashing",
+                        variable=self.enable_stash).grid(row=2, column=0, sticky="w", pady=4)
 
-    # ---------------------------------------------------------
-    # Apply UI → configs.json
-    # ---------------------------------------------------------
     def apply(self):
-        cfg = self.task.configs
-
-        cfg["actions"]["mine"]["delay"] = self.mine_delay.get()
-        cfg["actions"]["stash"]["delay"] = self.stash_delay.get()
-        cfg["settings"]["stashing"] = self.stashing_var.get()
-
-        self.task.save_configs()
-
-        # Rebuild callbacks
-        self.task.__init__(self.task.module_path)
-
-    def widget(self):
-        return self.frame
+        self.task.mining_delay = self.mining_delay.get()
+        self.task.stash_delay = self.stash_delay.get()
+        self.task.enable_stash = self.enable_stash.get()

@@ -31,6 +31,9 @@ class ScrollableFrame(ttk.Frame):
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
+        # Allow module widgets to expand horizontally
+        self.scrollable_frame.columnconfigure(0, weight=1)
+
         # Mousewheel scrolling
         self.scrollable_frame.bind(
             "<Enter>",
@@ -58,7 +61,7 @@ class Scheduler(ttk.Frame):
         self.active_module = None
         self.icons = {}
 
-        # Responsive layout
+        # Layout rows
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=0)   # top bar
         self.rowconfigure(1, weight=0)   # console
@@ -72,14 +75,13 @@ class Scheduler(ttk.Frame):
         style = ttk.Style()
         style.theme_use("clam")
 
-        # TAB STYLING (clean, modern)
+        # TAB STYLING
         style.configure("Tab.TButton",
                         background="#e6e6e6",
                         foreground="#000000",
                         padding=(14, 6),
                         relief="raised",
                         borderwidth=1)
-
         style.map("Tab.TButton",
                   background=[("active", "#dcdcdc")])
 
@@ -90,7 +92,7 @@ class Scheduler(ttk.Frame):
                         relief="flat",
                         borderwidth=1)
 
-        # General light theme
+        # General theme
         style.configure(".", background="#f2f2f2", foreground="#000000")
         style.configure("TFrame", background="#f2f2f2")
         style.configure("TLabelframe", background="#f2f2f2", foreground="#000000")
@@ -100,7 +102,7 @@ class Scheduler(ttk.Frame):
         style.map("TButton", background=[("active", "#d9d9d9")])
 
         # ---------------------------------------------------------
-        # Top Bar (Start/Stop Toggle + Title)
+        # Top Bar
         # ---------------------------------------------------------
         topbar = ttk.Frame(self)
         topbar.grid(row=0, column=0, sticky="ew", pady=5, padx=10)
@@ -138,7 +140,7 @@ class Scheduler(ttk.Frame):
         )
         self.log_text.grid(row=0, column=0, sticky="nsew")
 
-        # Log color tags
+        # Log tags
         self.log_text.tag_config("INFO", foreground="#000000")
         self.log_text.tag_config("ACTION", foreground="#007acc")
         self.log_text.tag_config("ERROR", foreground="#cc0000")
@@ -150,7 +152,7 @@ class Scheduler(ttk.Frame):
         Logger.gui_clear_callback = self.clear_log
 
         # ---------------------------------------------------------
-        # Module Tabs (row 2)
+        # Tabs
         # ---------------------------------------------------------
         tab_frame = ttk.Frame(self)
         tab_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=(5, 0))
@@ -171,13 +173,13 @@ class Scheduler(ttk.Frame):
             self.module_buttons[module_name] = btn
 
         # ---------------------------------------------------------
-        # Separator (row 3)
+        # Separator
         # ---------------------------------------------------------
         separator = ttk.Separator(self, orient="horizontal")
         separator.grid(row=3, column=0, sticky="ew")
 
         # ---------------------------------------------------------
-        # Scrollable Module Panel (row 4)
+        # Scrollable Module Panel
         # ---------------------------------------------------------
         self.panel_container = ScrollableFrame(self)
         self.panel_container.grid(row=4, column=0, sticky="nsew", padx=10, pady=5)
@@ -218,7 +220,9 @@ class Scheduler(ttk.Frame):
         UIClass = TASK_UI_REGISTRY.get(module_name)
         if UIClass:
             self.task_ui = UIClass(self.panel_container.scrollable_frame, self.task)
-            self.task_ui.widget().pack(fill="x", pady=5)
+            root_widget = self.task_ui.widget()
+            root_widget.pack(fill="x", padx=10, pady=10)
+            root_widget.columnconfigure(0, weight=1)
 
     # ---------------------------------------------------------
     # Logging
@@ -252,7 +256,7 @@ class Scheduler(ttk.Frame):
         self.running = True
 
         self.toggle_btn.config(text="Stop")
-        self.status.config(text=f"Status: Running")
+        self.status.config(text=f"Status: Module Running ({self.active_module})")
 
         threading.Thread(target=self.module_loop, daemon=True).start()
 
