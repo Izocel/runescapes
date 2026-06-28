@@ -145,7 +145,6 @@ class Engine:
         lastExec = action.lastExec
 
         if not active:
-            Logger.Info(f"Action '{name}' is inactive. Skipping execution.")
             return False
 
         if not Engine.DelayPassed(lastExec, delay or 0.0):

@@ -11,6 +11,8 @@ class MiningTask(Task):
     # Lifecycle
     # ---------------------------------------------------------
     def on_start(self):
+        Logger.Info("Mining-Task (loading configs)")
+        self.lodad()
         Logger.Success("Mining-Task (started)")
 
     def on_stop(self):

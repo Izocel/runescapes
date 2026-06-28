@@ -1,23 +1,24 @@
 {
-    "name": "Mining",
-    "description": "Automated ore mining task.",
-    "runnable": true,
-    "configs": {
-        "actions": [
-            {
-                "name": "mine",
-                "active": true,
-                "type": "mouse",
-                "key": "left",
-                "delay": 25
-            },
-            {
-                "name": "stash",
-                "active": true,
-                "type": "keyboard",
-                "key": "num 0",
-                "delay": 120
-            }
-        ]
-    }
+  "name": "Mining",
+  "description": "Automated ore mining task.",
+  "runnable": true,
+  "configs": {
+    "settings": {},
+    "actions": [
+      {
+        "name": "mine",
+        "active": true,
+        "type": "mouse",
+        "key": "left",
+        "delay": 25
+      },
+      {
+        "name": "stash",
+        "active": true,
+        "type": "keyboard",
+        "key": "num 0",
+        "delay": 120
+      }
+    ]
+  }
 }

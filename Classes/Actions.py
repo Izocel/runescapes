@@ -41,3 +41,17 @@ class Action:
 
         self.lastExec = d.get("lastExec", self.lastExec)
         self.nextExec = d.get("nextExec", self.nextExec)
+
+    def to_dict(self):
+        return {
+            "active": self.active,
+            "name": self.name,
+            "type": self.type,
+            "key": self.key,
+            "delay": self.delay,
+            "speed": self.speed,
+            "x": self.x,
+            "y": self.y,
+            "lastExec": self.lastExec,
+            "nextExec": self.nextExec,
+        }

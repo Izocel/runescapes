@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 from Classes.Actions import Action
 from Classes.Constants import MODULE_CONFIG_FILENAME
 from Services.ActionFactory import ActionFactory
+from Services.Logger import Logger
 
 
 @dataclass
@@ -22,7 +23,7 @@ class Task(ABC):
     subtasks: List["Task"] = field(default_factory=list)
 
     def __post_init__(self):
-        self.load_configs()
+        self.lodad()
 
     def reset(self):
         """Stops the task if it is running and resets it to its initial state."""
@@ -35,7 +36,7 @@ class Task(ABC):
     # ---------------------------------------------------------
     # Config loading / saving
     # ---------------------------------------------------------
-    def load_configs(self):
+    def lodad(self):
         """Load the configs file and parse the configs, settings, and actions."""
         if self.path is None:
             raise ValueError("Task path is not set. Cannot load configs.")
@@ -46,11 +47,18 @@ class Task(ABC):
             data = json.load(f)
 
         self.info = data
-        self.configs = data.get("configs", {})
-        self.settings = self.configs.get("settings", {})
-        self.actions = ActionFactory.Create(self.configs.get("actions", []))
+        self.configs = (
+            data["configs"] if "configs" in data else {"settings": {}, "actions": []}
+        )
 
-    def save_configs(self, new_configs=None):
+        # Ensure required keys exist
+        self.configs.setdefault("settings", {})
+        self.configs.setdefault("actions", [])
+
+        self.settings = self.configs["settings"]
+        self.actions = ActionFactory.Create(self.configs["actions"])
+
+    def save(self, new_configs=None):
         """Save the current configs to the configs file."""
         if self.path is None:
             raise ValueError("Task path is not set. Cannot save configs.")
@@ -62,7 +70,7 @@ class Task(ABC):
         self.info["configs"] = self.configs
 
         with open(config_path, "w") as f:
-            json.dump(self.info, f, indent=4)
+            json.dump(self.info, f, indent=2)
 
     # ---------------------------------------------------------
     # Subtasks

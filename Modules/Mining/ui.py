@@ -54,3 +54,20 @@ class TaskUI(ModuleUI):
                 row=row_index, column=1, sticky="w"
             )
             row_index += 1
+
+    def updateTask(self):
+        """Update the task's actions based on the current UI settings."""
+
+        # Update Action objects
+        self.stashAction.active = self.enable_stash.get()
+        self.miningAction.delay = self.numeric_vars["Mining Delay (sec.)"].get()
+        self.stashAction.delay = self.numeric_vars["Stash Delay (sec.)"].get()
+
+        # Push changes back into the task configs
+        action_dicts = [a.to_dict() for a in self.actions]
+
+        # Update task configs (reference!)
+        self.task.configs["actions"] = action_dicts
+
+        # Save to disk
+        self.task.save()
