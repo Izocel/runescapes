@@ -128,17 +128,14 @@ class Task(ABC):
     # ---------------------------------------------------------
     # Abstract methods
     # ---------------------------------------------------------
-    @abstractmethod
     def on_start(self):
         """Handle the start event."""
         pass
 
-    @abstractmethod
     def on_stop(self):
         """Handle the stop event."""
         pass
 
-    @abstractmethod
     def loop(self):
         """Handle the loop event."""
         pass

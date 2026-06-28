@@ -102,7 +102,6 @@ class ModuleUI:
         """Return the outer container frame that holds the canvas and scrollbar."""
         return self._container
 
-    @abstractmethod
     def updateTask(self):
         """Apply the current UI settings to the module's task."""
         pass

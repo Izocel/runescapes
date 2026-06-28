@@ -18,13 +18,3 @@ class AntiBanTask(Task):
 
         self.active_chance = self.settings.get("active_chance", 20)
         self.active_delay = self.settings.get("active_delay", 15)
-
-    def on_start(self):
-        Logger.Info("AntiBan-Task (applying configs)")
-        Logger.Success("AntiBan-Task (started)")
-
-    def on_stop(self):
-        Logger.Error("AntiBan-Task (stopped)")
-
-    def loop(self):
-        pass  # Module is not meant to be looped

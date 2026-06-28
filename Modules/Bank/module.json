@@ -1,0 +1,12 @@
+{
+  "name": "Bank",
+  "description": "Banking module.",
+  "active": false,
+  "runnable": false,
+  "configs": {
+    "settings": {
+      "enable": false,
+      "bank": "auto"
+    }
+  }
+}
