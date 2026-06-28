@@ -45,10 +45,10 @@ class TaskUI(ModuleUI):
 
     def on_enable_toggle(self):
         self.settings["enable"] = self.enabled.get()
-        # self.task.save()
+        self.task.save()
 
     def on_bank_change(self, event):
         new_key = self.bank_key_var.get()
         self.settings["bank"] = new_key
         self.bank = BANKS.get(new_key, BANKS["auto"])
-        # self.task.save()
+        self.task.save()

@@ -5,8 +5,9 @@
   "runnable": false,
   "configs": {
     "settings": {
-      "enable": false,
+      "enable": true,
       "bank": "auto"
-    }
+    },
+    "actions": []
   }
 }
