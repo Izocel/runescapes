@@ -246,14 +246,6 @@ class Scheduler(ttk.Frame):
             self.status.grid(row=0, column=1, sticky="w")
 
         else:
-            # Reuse toggle button but repurpose it as a Save button
-            self.toggle_btn = ttk.Button(
-                self.control_bar,
-                text="Save",
-                command=lambda: self.save_module_settings(module_name),
-            )
-            self.toggle_btn.grid(row=0, column=0, padx=5)
-
             self.status = ttk.Label(self.control_bar, text="Status: Settings-only")
             self.status.grid(row=0, column=1, sticky="w")
 
@@ -288,22 +280,8 @@ class Scheduler(ttk.Frame):
         else:
             self.start_module(self.active_module)
 
-    def save_module_settings(self, module_name):
-        ui = self.module_ui_instances.get(module_name)
-        if ui is not None:
-            if hasattr(ui, "updateTask"):
-                ui.updateTask()
-                Logger.Success(f"Settings saved for module '{module_name}'.")
-            else:
-                Logger.Error(
-                    f"Module '{module_name}' has no save() or updateTask() method."
-                )
-        else:
-            Logger.Error(f"No UI instance found for module '{module_name}'.")
-
     def start_module(self, module_name):
         if not self.runnable:
-            self.save_module_settings(module_name)
             return
 
         if self.module_running.get(module_name, False) or (
@@ -315,7 +293,6 @@ class Scheduler(ttk.Frame):
             )
             return
 
-        self.save_module_settings(module_name)  # Save settings before starting
         ui = self.module_ui_instances.get(module_name)
         task = ui.task
 

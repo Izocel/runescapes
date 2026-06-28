@@ -20,11 +20,18 @@ class TaskUI(ModuleUI):
         # ---------------------------------------------------------
         self.enable_stash = tk.BooleanVar(value=self.stashAction.active or False)
 
-        # Numeric fields grouped for looping
         self.numeric_vars = {
             "Mining Delay (sec.)": tk.IntVar(value=self.miningAction.delay or 999),
             "Stash Delay (sec.)": tk.IntVar(value=self.stashAction.delay or 999),
         }
+
+        # ---------------------------------------------------------
+        # Variable Traces (auto-update task)
+        # ---------------------------------------------------------
+        self.enable_stash.trace_add("write", self._on_bool_changed)
+
+        for var in self.numeric_vars.values():
+            var.trace_add("write", self._on_numeric_changed)
 
         # ---------------------------------------------------------
         # Mining Settings UI
@@ -35,16 +42,12 @@ class TaskUI(ModuleUI):
         settings.columnconfigure(0, weight=0)
         settings.columnconfigure(1, weight=0, minsize=80)
 
-        # ---------------------------------------------------------
         # Checkbox
-        # ---------------------------------------------------------
         ttk.Checkbutton(
             settings, text="Enable Stashing", variable=self.enable_stash
         ).grid(row=0, column=0, columnspan=2, sticky="w", pady=(2, 8))
 
-        # ---------------------------------------------------------
-        # Numeric Inputs (Mining + Stash)
-        # ---------------------------------------------------------
+        # Numeric Inputs
         row_index = 1
         for label_text, var in self.numeric_vars.items():
             ttk.Label(settings, text=label_text).grid(
@@ -55,16 +58,27 @@ class TaskUI(ModuleUI):
             )
             row_index += 1
 
-    def updateTask(self):
-        """Update the task's based on the current UI values."""
+    # ---------------------------------------------------------
+    # Callbacks
+    # ---------------------------------------------------------
 
-        # Update Action objects
+    def _on_bool_changed(self, *args):
+        # Update action
         self.stashAction.active = self.enable_stash.get()
+
+        # Regenerate configs
+        self.task.configs["actions"] = [a.to_dict() for a in self.actions]
+
+        # Save
+        self.task.save()
+
+    def _on_numeric_changed(self, *args):
+        # Update delays
         self.miningAction.delay = self.numeric_vars["Mining Delay (sec.)"].get()
         self.stashAction.delay = self.numeric_vars["Stash Delay (sec.)"].get()
 
-        # Update task configs
+        # Regenerate configs
         self.task.configs["actions"] = [a.to_dict() for a in self.actions]
 
-        # Save to disk
+        # Save
         self.task.save()

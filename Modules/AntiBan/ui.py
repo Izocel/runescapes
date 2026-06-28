@@ -28,6 +28,16 @@ class TaskUI(ModuleUI):
             "Active Chance (%)": tk.IntVar(value=stg.get("active_chance", 0)),
         }
 
+        # -------------------------
+        # Variable Traces
+        # -------------------------
+        self.enabled.trace_add("write", self._on_bool_changed)
+        self.mouseEnabled.trace_add("write", self._on_bool_changed)
+        self.keyboardEnabled.trace_add("write", self._on_bool_changed)
+
+        for var in self.numeric_vars.values():
+            var.trace_add("write", self._on_numeric_changed)
+
         # ============================================================
         # ANTI-BAN SETTINGS
         # ============================================================
@@ -53,15 +63,6 @@ class TaskUI(ModuleUI):
         # NUMERIC INPUTS (Delays + Chances)
         # ============================================================
 
-        def add_numeric_row(parent, row, label_text, var):
-            ttk.Label(parent, text=label_text).grid(
-                row=row, column=0, sticky="w", pady=2
-            )
-            ttk.Entry(parent, textvariable=var, width=6).grid(
-                row=row, column=1, sticky="w"
-            )
-
-        # Insert a small gap before the first delay field
         row_index = 3
         for label_text, var in self.numeric_vars.items():
             pady = (10, 2) if row_index == 3 else 2
@@ -73,15 +74,17 @@ class TaskUI(ModuleUI):
             )
             row_index += 1
 
-    def updateTask(self):
-        """Update the task's settings based on the current UI values."""
+    # -------------------------
+    # Callbacks
+    # -------------------------
 
-        # Boolean toggles
-        self.task.configs["settings"]["enable"] = self.enabled.get()
-        self.task.configs["settings"]["humanize_mouse"] = self.mouseEnabled.get()
-        self.task.configs["settings"]["humanize_keyboard"] = self.keyboardEnabled.get()
+    def _on_bool_changed(self, *args):
+        self.settings["enable"] = self.enabled.get()
+        self.settings["humanize_mouse"] = self.mouseEnabled.get()
+        self.settings["humanize_keyboard"] = self.keyboardEnabled.get()
+        self.task.save()
 
-        # Numeric settings
+    def _on_numeric_changed(self, *args):
         for label_text, var in self.numeric_vars.items():
             key = (
                 label_text.lower()
@@ -91,7 +94,6 @@ class TaskUI(ModuleUI):
                 .strip()
                 .strip("_")
             )
-            self.task.configs["settings"][key] = var.get()
+            self.settings[key] = var.get()
 
-        # Persist to disk
         self.task.save()

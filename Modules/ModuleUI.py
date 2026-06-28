@@ -101,7 +101,3 @@ class ModuleUI:
     def container(self):
         """Return the outer container frame that holds the canvas and scrollbar."""
         return self._container
-
-    def updateTask(self):
-        """Apply the current UI settings to the module's task."""
-        pass
