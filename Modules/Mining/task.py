@@ -1,4 +1,4 @@
-from Services.ActionFactory import ActionFactory
+from Services.Engine import Engine
 from Services.Logger import Logger
 from Tasks.Task import Task
 
@@ -11,8 +11,6 @@ class MiningTask(Task):
     # Lifecycle
     # ---------------------------------------------------------
     def on_start(self):
-        Logger.Info("Mining-Task (applying configs)")
-
         Logger.Success("Mining-Task (started)")
 
     def on_stop(self):
@@ -23,4 +21,5 @@ class MiningTask(Task):
     # ---------------------------------------------------------
     def loop(self):
         for action in self.actions:
-            ActionFactory.RunAction(action)
+            if Engine.TryExecuteAction(action):
+                Engine.TryUpdateAction(action)

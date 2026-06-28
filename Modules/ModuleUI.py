@@ -1,18 +1,23 @@
 import tkinter as tk
+from abc import abstractmethod
+from dataclasses import dataclass, field
 from tkinter import ttk
+from typing import Dict, List
 
+from Classes.Actions import Action
 from Services.ActionFactory import ActionFactory
+from Tasks.Task import Task
 
 
+@dataclass
 class ModuleUI:
     """Base UI container for a module."""
 
+    task: Task
+    parent: tk.Widget
+
     def __init__(self, parent, task):
         self.task = task
-        self.parent = parent
-        self.configs = task.configs
-        self.actions = task.actions
-        self.settings = task.settings
 
         # ---- Outer canvas + scrollbar (for module scrolling) ----
         self._container = ttk.Frame(parent, style="ModulePanel.TFrame")
@@ -81,5 +86,37 @@ class ModuleUI:
 
         self._canvas.bind("<Configure>", _on_canvas_configure)
 
-    def widget(self):
+    @property
+    def settings(self) -> Dict:
+        return self.task.settings
+
+    @property
+    def configs(self) -> Dict:
+        return self.task.configs
+
+    @property
+    def actions(self) -> List[Action]:
+        return self.task.actions
+
+    @property
+    def subtasks(self) -> List[Task]:
+        return self.task.subtasks
+
+    @property
+    def info(self) -> Dict:
+        return self.task.info
+
+    @property
+    def widget(self) -> tk.Widget:
+        """Return the outer container widget for this module."""
         return self._container
+
+    @abstractmethod
+    def load(self):
+        """Load the current module's task settings into the UI."""
+        pass
+
+    @abstractmethod
+    def apply(self):
+        """Apply the current UI settings to the module's task."""
+        pass

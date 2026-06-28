@@ -208,8 +208,7 @@ class Scheduler(ttk.Frame):
             if UIClass:
                 self.task_ui = UIClass(module_ui_frame, self.task)
                 self.module_ui_instances[module_name] = self.task_ui
-                widget = self.task_ui.widget()
-                widget.grid(row=0, column=0, sticky="nsew")
+                self.task_ui.widget.grid(row=0, column=0, sticky="nsew")
             else:
                 self.module_ui_instances[module_name] = None
 

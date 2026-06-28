@@ -1,33 +1,45 @@
 import json
 import os
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional
 
+from Classes.Actions import Action
 from Classes.Constants import MODULE_CONFIG_FILENAME
 from Services.ActionFactory import ActionFactory
 
 
+@dataclass
 class Task(ABC):
-    def __init__(self, path=None):
-        self.path = path
-        self.info = {}
+    path: str
+    state: str = "idle"
+    running: bool = False
+    info: Dict[str, str] = field(default_factory=dict)
+    configs: Dict[str, str] = field(default_factory=dict)
+    settings: Dict[str, str] = field(default_factory=dict)
+    context: Dict[str, str] = field(default_factory=dict)
+    actions: List[Action] = field(default_factory=list)
+    subtasks: List["Task"] = field(default_factory=list)
 
-        self.configs = {}
-        self.settings = {}
-        self.actions = []
-        self.subtasks = []
+    def __post_init__(self):
+        self.load_configs()
 
-        self.running = False
+    def reset(self):
+        """Stops the task if it is running and resets it to its initial state."""
+        if self.running:
+            self.stop()
         self.state = "idle"
+        self.running = False
         self.context = {}
-
-        if path:
-            self.load_configs()
 
     # ---------------------------------------------------------
     # Config loading / saving
     # ---------------------------------------------------------
     def load_configs(self):
         """Load the configs file and parse the configs, settings, and actions."""
+        if self.path is None:
+            raise ValueError("Task path is not set. Cannot load configs.")
+
         config_path = os.path.join(self.path, MODULE_CONFIG_FILENAME)
 
         with open(config_path, "r") as f:
@@ -38,8 +50,14 @@ class Task(ABC):
         self.settings = self.configs.get("settings", {})
         self.actions = ActionFactory.Create(self.configs.get("actions", []))
 
-    def save_configs(self):
+    def save_configs(self, new_configs=None):
         """Save the current configs to the configs file."""
+        if self.path is None:
+            raise ValueError("Task path is not set. Cannot save configs.")
+
+        if new_configs:
+            self.configs = new_configs
+
         config_path = os.path.join(self.path, MODULE_CONFIG_FILENAME)
         self.info["configs"] = self.configs
 
@@ -72,6 +90,7 @@ class Task(ABC):
     # ---------------------------------------------------------
     def start(self):
         """Start the task and its subtasks."""
+        self.reset()
         self.running = True
         self.set_state("starting")
         self.on_start()
@@ -86,7 +105,7 @@ class Task(ABC):
         for t in self.subtasks:
             t.stop()
         self.on_stop()
-        self.set_state("stopped")
+        self.reset()
 
     # ---------------------------------------------------------
     # Loop

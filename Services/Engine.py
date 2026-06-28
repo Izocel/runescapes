@@ -6,7 +6,7 @@ import keyboard
 from human_mouse import MouseController
 from pyHM import mouse
 
-from Services import ActionFactory
+from Classes.Actions import Action
 from Services.Logger import Logger
 
 MC = MouseController(always_zigzag=True)
@@ -132,39 +132,51 @@ class Engine:
         )
 
     @staticmethod
-    def ExecuteAction(action) -> bool:
+    def TryExecuteAction(action: Action) -> bool:
         """Execute the concrete action payload. Returns whether something executed."""
+        x = action.x
+        y = action.y
+        key = action.key
         name = action.name
-        a_type = action.type
+        speed = action.speed
+        delay = action.delay
+        active = action.active
+        actionType = action.type
+        lastExec = action.lastExec
 
-        if a_type == "mouse":
-            x = action.x
-            y = action.y
-            speed = action.speed
+        if not active:
+            Logger.Info(f"Action '{name}' is inactive. Skipping execution.")
+            return False
+
+        if not Engine.DelayPassed(lastExec, delay or 0.0):
+            return False
+
+        if actionType == "mouse":
             Engine.MouseClick(x=x, y=y, speed=speed)
             Logger.Info(
                 f"Mouse action '{name}' executed at ({x}, {y}) with speed {speed}"
             )
             return True
 
-        if a_type == "keyboard":
-            key = action.key
+        if actionType == "keyboard":
             Engine.KeyPress(key)
             Logger.Info(f"Keyboard action '{name}' executed")
             return True
 
-        if a_type == "delay":
+        if actionType == "delay":
             # For delay actions, action.delay is the sleep duration.
-            delay_val = action.delay
-            if delay_val is not None and delay_val != "":
-                try:
-                    Engine.Sleep(float(delay_val))
-                except Exception:
-                    Logger.Error(
-                        f"Delay action '{name}' has invalid delay: {delay_val}"
-                    )
-                    return False
+            if delay:
+                Engine.Sleep(float(delay))
             return True
 
-        Logger.Error(f"Unknown action type '{a_type}' for action '{name}'")
+        Logger.Error(f"Unknown action type '{actionType}' for action '{name}'")
         return False
+
+    @staticmethod
+    def TryUpdateAction(action: Action) -> None:
+        """Updates action lastExec / action.nextExec after a successful execution."""
+        delay = action.delay
+        now = Engine.CurrentTimeStamp()
+        action.lastExec = now
+        if delay:
+            action.nextExec = now + float(delay)

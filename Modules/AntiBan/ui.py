@@ -1,75 +1,74 @@
 import tkinter as tk
 from tkinter import ttk
 
+from Classes.Actions import Action
 from Modules.ModuleUI import ModuleUI
+from Services.ActionFactory import ActionFactory
 
 
 class TaskUI(ModuleUI):
     def __init__(self, parent, task):
         super().__init__(parent, task)
-        cfg = self.configs
+        stg = self.settings
 
-        self.camera_delay = tk.IntVar(value=8)
-        self.idle_delay = tk.IntVar(value=3)
-        self.active_delay = tk.IntVar(value=15)
-        self.enable_var = tk.BooleanVar(value=cfg.get("enable", True))
-        self.mouse_var = tk.BooleanVar(value=cfg.get("humanize_mouse", True))
-        self.keyboard_var = tk.BooleanVar(value=cfg.get("humanize_keyboard", True))
+        # -------------------------
+        # Tk Variables
+        # -------------------------
+        self.enabled = tk.BooleanVar(value=stg.get("enable", False))
+        self.mouseEnabled = tk.BooleanVar(value=stg.get("humanize_mouse", False))
+        self.keyboardEnabled = tk.BooleanVar(value=stg.get("humanize_keyboard", False))
 
+        # Numeric fields stored in a dict for easy looping
+        self.numeric_vars = {
+            "Camera Delay (sec.)": tk.IntVar(value=stg.get("camera_delay", 999)),
+            "Idle Delay (sec.)": tk.IntVar(value=stg.get("idle_delay", 999)),
+            "Active Delay (sec.)": tk.IntVar(value=stg.get("active_delay", 999)),
+            "Camera Chance (%)": tk.IntVar(value=stg.get("camera_chance", 0)),
+            "Idle Chance (%)": tk.IntVar(value=stg.get("idle_chance", 0)),
+            "Active Chance (%)": tk.IntVar(value=stg.get("active_chance", 0)),
+        }
+
+        # ============================================================
+        # ANTI-BAN SETTINGS
+        # ============================================================
         settings = ttk.LabelFrame(self.frame, text="Anti-Ban Settings")
-        settings.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
-        settings.columnconfigure(0, weight=1)
+        settings.grid(row=0, column=0, sticky="nw", padx=5, pady=5)
 
-        ttk.Checkbutton(
-            settings, text="Enable Anti-Ban", variable=self.enable_var
-        ).grid(row=0, column=0, sticky="w", pady=2)
-        ttk.Checkbutton(settings, text="Humanize Mouse", variable=self.mouse_var).grid(
-            row=1, column=0, sticky="w", pady=2
-        )
-        ttk.Checkbutton(
-            settings, text="Humanize Keyboard", variable=self.keyboard_var
-        ).grid(row=2, column=0, sticky="w", pady=2)
+        settings.columnconfigure(0, weight=0)
+        settings.columnconfigure(1, weight=0, minsize=80)
 
-        self.camera_chance = tk.IntVar(value=cfg.get("camera_chance", 50))
-        self.idle_chance = tk.IntVar(value=cfg.get("idle_chance", 30))
-        self.active_chance = tk.IntVar(value=cfg.get("active_chance", 20))
+        # --- Checkboxes ---
+        for i, (text, var) in enumerate(
+            [
+                ("Enable Anti-Ban", self.enabled),
+                ("Humanize Mouse", self.mouseEnabled),
+                ("Humanize Keyboard", self.keyboardEnabled),
+            ]
+        ):
+            ttk.Checkbutton(settings, text=text, variable=var).grid(
+                row=i, column=0, columnspan=2, sticky="w", pady=2
+            )
 
-        ttk.Label(settings, text="Camera Chance").grid(row=3, column=0, sticky="w")
-        ttk.Scale(
-            settings, from_=0, to=100, orient="horizontal", variable=self.camera_chance
-        ).grid(row=4, column=0, sticky="ew", pady=3)
+        # ============================================================
+        # NUMERIC INPUTS (Delays + Chances)
+        # ============================================================
 
-        ttk.Label(settings, text="Idle Chance").grid(row=5, column=0, sticky="w")
-        ttk.Scale(
-            settings, from_=0, to=100, orient="horizontal", variable=self.idle_chance
-        ).grid(row=6, column=0, sticky="ew", pady=3)
+        def add_numeric_row(parent, row, label_text, var):
+            ttk.Label(parent, text=label_text).grid(
+                row=row, column=0, sticky="w", pady=2
+            )
+            ttk.Entry(parent, textvariable=var, width=6).grid(
+                row=row, column=1, sticky="w"
+            )
 
-        ttk.Label(settings, text="Active Chance").grid(row=7, column=0, sticky="w")
-        ttk.Scale(
-            settings, from_=0, to=100, orient="horizontal", variable=self.active_chance
-        ).grid(row=8, column=0, sticky="ew", pady=3)
-
-        delays = ttk.LabelFrame(self.frame, text="Delays")
-        delays.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
-        delays.columnconfigure(1, weight=1)
-
-        ttk.Label(delays, text="Camera Delay (sec.):").grid(
-            row=0, column=0, sticky="w", pady=2
-        )
-        ttk.Entry(delays, textvariable=self.camera_delay, width=6).grid(
-            row=0, column=1, sticky="w"
-        )
-
-        ttk.Label(delays, text="Idle Delay (sec.):").grid(
-            row=1, column=0, sticky="w", pady=2
-        )
-        ttk.Entry(delays, textvariable=self.idle_delay, width=6).grid(
-            row=1, column=1, sticky="w"
-        )
-
-        ttk.Label(delays, text="Active Delay (sec.):").grid(
-            row=2, column=0, sticky="w", pady=2
-        )
-        ttk.Entry(delays, textvariable=self.active_delay, width=6).grid(
-            row=2, column=1, sticky="w"
-        )
+        # Insert a small gap before the first delay field
+        row_index = 3
+        for label_text, var in self.numeric_vars.items():
+            pady = (10, 2) if row_index == 3 else 2
+            ttk.Label(settings, text=label_text).grid(
+                row=row_index, column=0, sticky="w", pady=pady
+            )
+            ttk.Entry(settings, textvariable=var, width=6).grid(
+                row=row_index, column=1, sticky="w"
+            )
+            row_index += 1
