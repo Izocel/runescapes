@@ -1,5 +1,6 @@
 import datetime
 
+
 class Logger:
     gui_callback = None
     gui_clear_callback = None
@@ -30,12 +31,21 @@ class Logger:
             Logger.Info("-------- Log Copied to Clipboard --------")
 
     @staticmethod
-    def Info(msg): Logger._log(msg, "INFO")
+    def Info(msg):
+        Logger._log(msg, "INFO")
+
     @staticmethod
-    def Action(msg): Logger._log(msg, "ACTION")
+    def Action(msg):
+        Logger._log(msg, "ACTION")
+
     @staticmethod
-    def Error(msg): Logger._log(msg, "ERROR")
+    def Error(msg):
+        Logger._log(msg, "ERROR")
+
     @staticmethod
-    def Success(msg): Logger._log(msg, "SUCCESS")
+    def Success(msg):
+        Logger._log(msg, "SUCCESS")
+
     @staticmethod
-    def Debug(msg): Logger._log(msg, "DEBUG")
+    def Debug(msg):
+        Logger._log(msg, "DEBUG")

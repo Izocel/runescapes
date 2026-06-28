@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from Services.ActionFactory import ActionFactory
+
 
 class ModuleUI:
     """Base UI container for a module.
@@ -12,9 +14,11 @@ class ModuleUI:
     """
 
     def __init__(self, parent, task, configs):
-        self.parent = parent
         self.task = task
-        self.configs = configs  # module.json configs
+        self.parent = parent
+        self.configs = configs or {}
+        self.settings = self.configs.get("settings", {})
+        self.actions = ActionFactory.Create(self.configs.get("actions", []))
 
         # ---- Outer canvas + scrollbar (for module scrolling) ----
         self._container = ttk.Frame(parent, style="ModulePanel.TFrame")
@@ -32,7 +36,9 @@ class ModuleUI:
         self._canvas.grid(row=0, column=0, sticky="nsew")
 
         # Keep scrollable content but hide the scrollbar (views can still scroll via mouse wheel)
-        v_scroll = ttk.Scrollbar(self._container, orient="vertical", command=self._canvas.yview)
+        v_scroll = ttk.Scrollbar(
+            self._container, orient="vertical", command=self._canvas.yview
+        )
         v_scroll.grid_forget()
         self._canvas.configure(yscrollcommand=v_scroll.set)
 
@@ -43,10 +49,10 @@ class ModuleUI:
 
         # Important: bind/unbind on enter/leave so only the active tab's
         # module is scrollable.
-        self._canvas.bind("<Enter>", lambda e: self._canvas.bind_all("<MouseWheel>", _on_mousewheel))
+        self._canvas.bind(
+            "<Enter>", lambda e: self._canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        )
         self._canvas.bind("<Leave>", lambda e: self._canvas.unbind_all("<MouseWheel>"))
-
-
 
         # Inner frame that holds actual module widgets
         self.frame = ttk.Frame(self._canvas, style="ModuleCard.TFrame")
@@ -58,9 +64,9 @@ class ModuleUI:
         self.frame.rowconfigure(0, weight=1)
         self.frame.columnconfigure(0, weight=1)
 
-
-
-        self._window_id = self._canvas.create_window((0, 0), window=self.frame, anchor="nw")
+        self._window_id = self._canvas.create_window(
+            (0, 0), window=self.frame, anchor="nw"
+        )
 
         # Keep scroll region updated as the frame size changes
         def _on_frame_configure(_event=None):
@@ -81,7 +87,6 @@ class ModuleUI:
 
         self._canvas.bind("<Configure>", _on_canvas_configure)
 
-
         # ---- Shared header look (modules can optionally create their own) ----
         # Provide a convenient, reusable "settings card" style.
         # Individual module UIs currently create their own ttk.LabelFrame; those will
@@ -92,4 +97,3 @@ class ModuleUI:
 
     def apply(self):
         pass
-

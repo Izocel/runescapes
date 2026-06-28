@@ -1,6 +1,9 @@
-from abc import ABC, abstractmethod
-import os
 import json
+import os
+from abc import ABC, abstractmethod
+
+from Services.ActionFactory import ActionFactory
+
 
 class Task(ABC):
     def __init__(self, module_path=None, configs=None):
@@ -12,14 +15,12 @@ class Task(ABC):
         self.module_path = module_path
         self.module_info = {}
         self.configs = {}
+        self.settings = {}
+        self.actions = []
 
         # Load configs from module.json
         if module_path:
             self.load_configs()
-
-        # Override with configs passed from loader/scheduler
-        if configs is not None:
-            self.configs = configs
 
     # ---------------------------------------------------------
     # Config loading / saving
@@ -32,6 +33,8 @@ class Task(ABC):
 
         self.module_info = data
         self.configs = data.get("configs", {})
+        self.settings = self.configs.get("settings", {})
+        self.actions = ActionFactory.Create(self.configs.get("actions", []))
 
     def save_configs(self):
         config_path = os.path.join(self.module_path, "module.json")
@@ -90,10 +93,13 @@ class Task(ABC):
     # Abstract methods
     # ---------------------------------------------------------
     @abstractmethod
-    def on_start(self): pass
+    def on_start(self):
+        pass
 
     @abstractmethod
-    def on_stop(self): pass
+    def on_stop(self):
+        pass
 
     @abstractmethod
-    def loop(self): pass
+    def loop(self):
+        pass

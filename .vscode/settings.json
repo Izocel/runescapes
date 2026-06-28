@@ -1,3 +1,41 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+    "editor.rulers": [
+        120
+    ],
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "diffviewer.drawFileList": true,
+    "diffviewer.colorScheme": "light",
+    "diffviewer.outputFormat": "side-by-side",
+    "editor.wordBasedSuggestions": "matchingDocuments",
+    "editor.suggestOnTriggerCharacters": true,
+    "editor.suggest.showWords": true,
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": true,
+        "strings": true
+    },
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "[json]": {
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[dotenv]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "[ignore]": {
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "python.analysis.autoImportCompletions": true,
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe"
 }

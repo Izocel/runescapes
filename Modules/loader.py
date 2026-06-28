@@ -1,15 +1,17 @@
-import os
-import json
 import importlib
 import inspect
+import json
+import os
 
 from Tasks.Task import Task
 
 MODULES_PATH = os.path.dirname(__file__)
 
-TASK_REGISTRY = {}        # { "Mining": { "task": TaskClass, "path": dir, "runnable": bool, "configs": {...}, "description": str } }
-TASK_UI_REGISTRY = {}     # { "Mining": UIClass }
-MODULE_INFO = {}          # Raw module.json data
+TASK_REGISTRY = (
+    {}
+)  # { "Mining": { "task": TaskClass, "path": dir, "moduleIsRunnable": bool, "moduleConfigs": {...}, "moduleDescription": str } }
+TASK_UI_REGISTRY = {}  # { "Mining": UIClass }
+MODULE_INFO = {}  # Raw module.json data
 
 
 def load_modules():
@@ -44,11 +46,10 @@ def load_modules():
             continue
 
         MODULE_INFO[folder] = info
-
-        display_name = info.get("name", folder)
-        runnable = info.get("runnable", True)
-        description = info.get("description", "")
-        configs = info.get("configs", {})
+        moduleName = info.get("name", folder)
+        moduleConfigs = info.get("configs", {})
+        moduleIsRunnable = info.get("runnable", False)
+        moduleDescription = info.get("description", "")
 
         # ---------------------------------------------------------
         # Load task.py
@@ -66,7 +67,7 @@ def load_modules():
                 raise Exception("No Task subclass found")
 
         except Exception as e:
-            print(f"[Module Loader] Failed to load Task for {display_name}: {e}")
+            print(f"[Module Loader] Failed to load Task for {moduleName}: {e}")
             continue
 
         # ---------------------------------------------------------
@@ -84,7 +85,7 @@ def load_modules():
                     if obj.__name__.lower() in (
                         "taskui",
                         f"{folder.lower()}ui",
-                        f"{display_name.lower()}ui"
+                        f"{moduleName.lower()}ui",
                     ):
                         UIClass = obj
                         break
@@ -93,24 +94,24 @@ def load_modules():
                     raise Exception("No UI class found")
 
             except Exception as e:
-                print(f"[Module Loader] Failed to load UI for {display_name}: {e}")
+                print(f"[Module Loader] Failed to load UI for {moduleName}: {e}")
 
         # ---------------------------------------------------------
         # Register module
         # ---------------------------------------------------------
-        TASK_REGISTRY[display_name] = {
+        TASK_REGISTRY[moduleName] = {
             "task": TaskClass,
             "path": module_dir,
-            "runnable": runnable,
-            "description": description,
-            "configs": configs
+            "configs": moduleConfigs,
+            "runnable": moduleIsRunnable,
+            "description": moduleDescription,
         }
 
         if UIClass:
-            TASK_UI_REGISTRY[display_name] = UIClass
+            TASK_UI_REGISTRY[moduleName] = UIClass
 
-        print(f"[Module Loader] Loaded module: {display_name}")
+        print(f"[Module Loader] Loaded module: {moduleName}")
 
 
-# Load modules on import
+# Load modules on  import
 load_modules()

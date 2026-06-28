@@ -1,11 +1,12 @@
-import tkinter as tk
-from tkinter import ttk
-from PIL import Image, ImageTk
 import os
 import threading
+import tkinter as tk
+from tkinter import ttk
+
+from PIL import Image, ImageTk
 
 from Modules.loader import TASK_REGISTRY, TASK_UI_REGISTRY
-from Logger import Logger
+from Services.Logger import Logger
 
 
 class Scheduler(ttk.Frame):
@@ -64,12 +65,16 @@ class Scheduler(ttk.Frame):
         )
         style.configure("TLabel", background="#f2f2f2", foreground="#111111")
 
-        style.configure("TButton", background="#e6e6e6", foreground="#111111", padding=6)
+        style.configure(
+            "TButton", background="#e6e6e6", foreground="#111111", padding=6
+        )
         style.map("TButton", background=[("active", "#d9d9d9")])
 
         # Used by Modules/ModuleUI.py
         style.configure("ModulePanel.TFrame", background="#f2f2f2")
-        style.configure("ModuleCard.TFrame", background="#ffffff", borderwidth=1, relief="solid")
+        style.configure(
+            "ModuleCard.TFrame", background="#ffffff", borderwidth=1, relief="solid"
+        )
 
         # ---------------- TOP BAR ----------------
         topbar = ttk.Frame(self)
@@ -167,7 +172,9 @@ class Scheduler(ttk.Frame):
 
     def switch_module(self, module_name):
         for name, btn in self.module_buttons.items():
-            btn.config(style="TabActive.TButton" if name == module_name else "Tab.TButton")
+            btn.config(
+                style="TabActive.TButton" if name == module_name else "Tab.TButton"
+            )
 
         self.active_module = module_name
 
@@ -181,7 +188,10 @@ class Scheduler(ttk.Frame):
         self.task = TaskClass(module_path=module_path, configs=configs)
 
         # UI cache
-        if module_name in self.module_ui_instances and self.module_ui_instances[module_name] is not None:
+        if (
+            module_name in self.module_ui_instances
+            and self.module_ui_instances[module_name] is not None
+        ):
             self.task_ui = self.module_ui_instances[module_name]
             self.task_ui.task = self.task
         else:
@@ -229,14 +239,15 @@ class Scheduler(ttk.Frame):
             self.toggle_btn.grid(row=0, column=0, padx=5)
 
             status_text = (
-                f"Status: Running ({module_name})" if is_running_this else "Status: Idle"
+                f"Status: Running ({module_name})"
+                if is_running_this
+                else "Status: Idle"
             )
             self.status = ttk.Label(self.control_bar, text=status_text)
             self.status.grid(row=0, column=1, sticky="w")
         else:
             self.status = ttk.Label(self.control_bar, text="Status: Settings-only")
             self.status.grid(row=0, column=0, sticky="w", padx=5)
-
 
     # ---------------------------------------------------------
     # LOGGING
@@ -274,8 +285,13 @@ class Scheduler(ttk.Frame):
             Logger.Error(f"Module {module_name} cannot be started (settings-only).")
             return
 
-        if self.currently_running_module and self.currently_running_module != module_name:
-            Logger.Error(f"Only one module can run at a time. Stop '{self.currently_running_module}' first.")
+        if (
+            self.currently_running_module
+            and self.currently_running_module != module_name
+        ):
+            Logger.Error(
+                f"Only one module can run at a time. Stop '{self.currently_running_module}' first."
+            )
             return
 
         if self.module_running.get(module_name, False):
@@ -286,7 +302,9 @@ class Scheduler(ttk.Frame):
             TaskClass = meta["task"]
             module_path = meta["path"]
             configs = meta["configs"]
-            self.module_tasks[module_name] = TaskClass(module_path=module_path, configs=configs)
+            self.module_tasks[module_name] = TaskClass(
+                module_path=module_path, configs=configs
+            )
 
         task = self.module_tasks[module_name]
 
@@ -304,7 +322,9 @@ class Scheduler(ttk.Frame):
             self.toggle_btn.config(text="Stop")
             self.status.config(text=f"Status: Running ({module_name})")
 
-        threading.Thread(target=self.module_loop, args=(module_name, task), daemon=True).start()
+        threading.Thread(
+            target=self.module_loop, args=(module_name, task), daemon=True
+        ).start()
 
     def stop_module(self, module_name):
         if not self.module_running.get(module_name, False):
@@ -325,4 +345,3 @@ class Scheduler(ttk.Frame):
     def module_loop(self, module_name, task):
         while self.module_running.get(module_name, False) and task.running:
             task.loop_all()
-

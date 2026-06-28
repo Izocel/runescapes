@@ -134,5 +134,3 @@ class BasicAction:
             "lastExec": self.lastExec,
             "nextExec": self.nextExec,
         }
-
-
