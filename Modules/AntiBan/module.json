@@ -5,9 +5,9 @@
   "runnable": false,
   "configs": {
     "settings": {
-      "enable": false,
-      "humanize_mouse": false,
-      "humanize_keyboard": false,
+      "enable": true,
+      "humanize_mouse": true,
+      "humanize_keyboard": true,
       "camera_delay": 10,
       "idle_delay": 20,
       "active_delay": 30,
