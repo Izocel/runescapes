@@ -56,7 +56,7 @@ class TaskUI(ModuleUI):
             row_index += 1
 
     def updateTask(self):
-        """Update the task's actions based on the current UI settings."""
+        """Update the task's based on the current UI values."""
 
         # Update Action objects
         self.stashAction.active = self.enable_stash.get()

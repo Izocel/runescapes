@@ -72,3 +72,26 @@ class TaskUI(ModuleUI):
                 row=row_index, column=1, sticky="w"
             )
             row_index += 1
+
+    def updateTask(self):
+        """Update the task's settings based on the current UI values."""
+
+        # Boolean toggles
+        self.task.configs["settings"]["enable"] = self.enabled.get()
+        self.task.configs["settings"]["humanize_mouse"] = self.mouseEnabled.get()
+        self.task.configs["settings"]["humanize_keyboard"] = self.keyboardEnabled.get()
+
+        # Numeric settings
+        for label_text, var in self.numeric_vars.items():
+            key = (
+                label_text.lower()
+                .replace(" ", "_")
+                .replace("(sec.)", "")
+                .replace("(%)", "")
+                .strip()
+                .strip("_")
+            )
+            self.task.configs["settings"][key] = var.get()
+
+        # Persist to disk
+        self.task.save()

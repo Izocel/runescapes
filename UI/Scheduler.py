@@ -227,9 +227,11 @@ class Scheduler(ttk.Frame):
         self.control_bar.grid(row=1, column=0, sticky="ew", pady=(10, 0))
         self.control_bar.columnconfigure(1, weight=1)
 
+        # Always create the toggle button, but change its purpose depending on runnable
         if self.runnable:
             is_running_this = self.module_running.get(module_name, False)
             btn_text = "Stop" if is_running_this else "Start"
+
             self.toggle_btn = ttk.Button(
                 self.control_bar, text=btn_text, command=self.toggle_module
             )
@@ -242,9 +244,18 @@ class Scheduler(ttk.Frame):
             )
             self.status = ttk.Label(self.control_bar, text=status_text)
             self.status.grid(row=0, column=1, sticky="w")
+
         else:
+            # Reuse toggle button but repurpose it as a Save button
+            self.toggle_btn = ttk.Button(
+                self.control_bar,
+                text="Save",
+                command=lambda: self.save_module_settings(module_name),
+            )
+            self.toggle_btn.grid(row=0, column=0, padx=5)
+
             self.status = ttk.Label(self.control_bar, text="Status: Settings-only")
-            self.status.grid(row=0, column=0, sticky="w", padx=5)
+            self.status.grid(row=0, column=1, sticky="w")
 
     # ---------------------------------------------------------
     # LOGGING
@@ -277,12 +288,25 @@ class Scheduler(ttk.Frame):
         else:
             self.start_module(self.active_module)
 
+    def save_module_settings(self, module_name):
+        ui = self.module_ui_instances.get(module_name)
+        if ui is not None:
+            if hasattr(ui, "updateTask"):
+                ui.updateTask()
+                Logger.Success(f"Settings saved for module '{module_name}'.")
+            else:
+                Logger.Error(
+                    f"Module '{module_name}' has no save() or updateTask() method."
+                )
+        else:
+            Logger.Error(f"No UI instance found for module '{module_name}'.")
+
     def start_module(self, module_name):
         if not self.runnable:
-            Logger.Error(f"Module {module_name} cannot be started (settings-only).")
+            self.save_module_settings(module_name)
             return
 
-        if (
+        if self.module_running.get(module_name, False) or (
             self.currently_running_module
             and self.currently_running_module != module_name
         ):
@@ -291,21 +315,9 @@ class Scheduler(ttk.Frame):
             )
             return
 
-        if self.module_running.get(module_name, False):
-            return
-
-        if module_name not in self.module_tasks:
-            meta = TASK_REGISTRY[module_name]
-            TaskClass = meta["task"]
-            path = meta["path"]
-            self.module_tasks[module_name] = TaskClass(path=path)
-
-        task = self.module_tasks[module_name]
-
+        self.save_module_settings(module_name)  # Save settings before starting
         ui = self.module_ui_instances.get(module_name)
-        if ui is not None:
-            ui.task = task
-            ui.updateTask()
+        task = ui.task
 
         task.start()
         self.module_running[module_name] = True

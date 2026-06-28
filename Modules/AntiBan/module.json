@@ -1,28 +1,28 @@
 {
-    "name": "Anti-Ban",
-    "description": "Human-like anti-ban behavior.",
-    "active": false,
-    "runnable": false,
-    "configs": {
-        "settings": {
-            "enable": true,
-            "humanize_mouse": true,
-            "humanize_keyboard": true,
-            "camera_chance": 50,
-            "idle_chance": 30,
-            "active_chance": 20,
-            "camera_delay": 8,
-            "idle_delay": 3,
-            "active_delay": 15
-        },
-        "actions": [
-            {
-                "active": true,
-                "chance": 0.01,
-                "name": "camera_move",
-                "type": "mouse",
-                "key": "camera_move"
-            }
-        ]
-    }
+  "name": "Anti-Ban",
+  "description": "Human-like anti-ban behavior.",
+  "active": false,
+  "runnable": false,
+  "configs": {
+    "settings": {
+      "enable": false,
+      "humanize_mouse": false,
+      "humanize_keyboard": false,
+      "camera_delay": 10,
+      "idle_delay": 20,
+      "active_delay": 30,
+      "camera_chance": 40,
+      "idle_chance": 50,
+      "active_chance": 60
+    },
+    "actions": [
+      {
+        "active": true,
+        "chance": 0.01,
+        "name": "camera_move",
+        "type": "mouse",
+        "key": "camera_move"
+      }
+    ]
+  }
 }
