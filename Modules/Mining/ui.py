@@ -63,11 +63,8 @@ class TaskUI(ModuleUI):
         self.miningAction.delay = self.numeric_vars["Mining Delay (sec.)"].get()
         self.stashAction.delay = self.numeric_vars["Stash Delay (sec.)"].get()
 
-        # Push changes back into the task configs
-        action_dicts = [a.to_dict() for a in self.actions]
-
-        # Update task configs (reference!)
-        self.task.configs["actions"] = action_dicts
+        # Update task configs
+        self.task.configs["actions"] = [a.to_dict() for a in self.actions]
 
         # Save to disk
         self.task.save()
