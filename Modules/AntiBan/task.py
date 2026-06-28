@@ -3,8 +3,8 @@ from Tasks.Task import Task
 
 
 class AntiBanTask(Task):
-    def __init__(self, module_path, configs=None):
-        super().__init__(module_path, configs)
+    def __init__(self, path):
+        super().__init__(path)
 
         self.enable = self.settings.get("enable", False)
         self.humanize_mouse = self.settings.get("humanize_mouse", True)
@@ -20,10 +20,11 @@ class AntiBanTask(Task):
         self.active_delay = self.settings.get("active_delay", 15)
 
     def on_start(self):
-        Logger.Success("Anti-ban started")
+        Logger.Info("AntiBan-Task (applying configs)")
+        Logger.Success("AntiBan-Task (started)")
 
     def on_stop(self):
-        Logger.Error("Anti-ban stopped")
+        Logger.Error("AntiBan-Task (stopped)")
 
     def loop(self):
         pass  # Module is not meant to be looped

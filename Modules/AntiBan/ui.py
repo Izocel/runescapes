@@ -5,21 +5,20 @@ from Modules.ModuleUI import ModuleUI
 
 
 class TaskUI(ModuleUI):
-    def __init__(self, parent, task, configs):
-        super().__init__(parent, task, configs)
+    def __init__(self, parent, task):
+        super().__init__(parent, task)
+        cfg = self.configs
+
+        self.camera_delay = tk.IntVar(value=8)
+        self.idle_delay = tk.IntVar(value=3)
+        self.active_delay = tk.IntVar(value=15)
+        self.enable_var = tk.BooleanVar(value=cfg.get("enable", True))
+        self.mouse_var = tk.BooleanVar(value=cfg.get("humanize_mouse", True))
+        self.keyboard_var = tk.BooleanVar(value=cfg.get("humanize_keyboard", True))
 
         settings = ttk.LabelFrame(self.frame, text="Anti-Ban Settings")
         settings.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         settings.columnconfigure(0, weight=1)
-
-        # Initialize from module.json configs.settings
-        settings_cfg = (configs or {}).get("settings", {})
-
-        self.enable_var = tk.BooleanVar(value=settings_cfg.get("enable", True))
-        self.mouse_var = tk.BooleanVar(value=settings_cfg.get("humanize_mouse", True))
-        self.keyboard_var = tk.BooleanVar(
-            value=settings_cfg.get("humanize_keyboard", True)
-        )
 
         ttk.Checkbutton(
             settings, text="Enable Anti-Ban", variable=self.enable_var
@@ -31,9 +30,9 @@ class TaskUI(ModuleUI):
             settings, text="Humanize Keyboard", variable=self.keyboard_var
         ).grid(row=2, column=0, sticky="w", pady=2)
 
-        self.camera_chance = tk.IntVar(value=settings_cfg.get("camera_chance", 50))
-        self.idle_chance = tk.IntVar(value=settings_cfg.get("idle_chance", 30))
-        self.active_chance = tk.IntVar(value=settings_cfg.get("active_chance", 20))
+        self.camera_chance = tk.IntVar(value=cfg.get("camera_chance", 50))
+        self.idle_chance = tk.IntVar(value=cfg.get("idle_chance", 30))
+        self.active_chance = tk.IntVar(value=cfg.get("active_chance", 20))
 
         ttk.Label(settings, text="Camera Chance").grid(row=3, column=0, sticky="w")
         ttk.Scale(
@@ -53,10 +52,6 @@ class TaskUI(ModuleUI):
         delays = ttk.LabelFrame(self.frame, text="Delays")
         delays.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
         delays.columnconfigure(1, weight=1)
-
-        self.camera_delay = tk.IntVar(value=8)
-        self.idle_delay = tk.IntVar(value=3)
-        self.active_delay = tk.IntVar(value=15)
 
         ttk.Label(delays, text="Camera Delay (sec.):").grid(
             row=0, column=0, sticky="w", pady=2

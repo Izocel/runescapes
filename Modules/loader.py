@@ -3,27 +3,21 @@ import inspect
 import json
 import os
 
+from Classes.Constants import MODULE_CONFIG_FILENAME
 from Tasks.Task import Task
 
 MODULES_PATH = os.path.dirname(__file__)
 
-TASK_REGISTRY = (
-    {}
-)  # { "Mining": { "task": TaskClass, "path": dir, "moduleIsRunnable": bool, "moduleConfigs": {...}, "moduleDescription": str } }
-TASK_UI_REGISTRY = {}  # { "Mining": UIClass }
-MODULE_INFO = {}  # Raw module.json data
+# Registry of raw module information loaded from configs files
+MODULE_INFO = {}
+# Registry of loaded Task classes and their associated information
+TASK_REGISTRY = {}
+# Registry of loaded TaskUI classes and their associated information
+TASK_UI_REGISTRY = {}
 
 
 def load_modules():
-    """
-    Loads all modules inside /Modules/<ModuleName>/
-    Expected structure:
-        Modules/<ModuleName>/
-            module.json
-            task.py  -> class Task (subclass of base Task)
-            ui.py    -> class TaskUI (optional)
-            icon.png (optional)
-    """
+    """Loads all modules inside the `Modules` directory and registers their Task and TaskUI classes."""
 
     for folder in os.listdir(MODULES_PATH):
         module_dir = os.path.join(MODULES_PATH, folder)
@@ -32,9 +26,9 @@ def load_modules():
             continue
 
         # ---------------------------------------------------------
-        # Load module.json
+        # Load json configs
         # ---------------------------------------------------------
-        json_path = os.path.join(module_dir, "module.json")
+        json_path = os.path.join(module_dir, MODULE_CONFIG_FILENAME)
         if not os.path.exists(json_path):
             continue
 
@@ -42,7 +36,9 @@ def load_modules():
             with open(json_path, "r") as f:
                 info = json.load(f)
         except Exception as e:
-            print(f"[Module Loader] Failed to read module.json in {folder}: {e}")
+            print(
+                f"[Module Loader] Failed to read {MODULE_CONFIG_FILENAME} in {folder}: {e}"
+            )
             continue
 
         MODULE_INFO[folder] = info

@@ -1,0 +1,1 @@
+MODULE_CONFIG_FILENAME = "module.json"

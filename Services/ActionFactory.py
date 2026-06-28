@@ -11,7 +11,7 @@ class ActionFactory:
 
     @staticmethod
     def Create(actions: Iterable[dict[str, Any]]) -> list[BasicAction]:
-        """Create `BasicAction` instances from module.json `actions` entries."""
+        """Create `BasicAction` instances from plain `actions` entries."""
         basic: list[BasicAction] = []
 
         for a in actions:

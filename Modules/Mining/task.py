@@ -4,17 +4,19 @@ from Tasks.Task import Task
 
 
 class MiningTask(Task):
-    def __init__(self, module_path, configs=None):
-        super().__init__(module_path, configs)
+    def __init__(self, path):
+        super().__init__(path)
 
     # ---------------------------------------------------------
     # Lifecycle
     # ---------------------------------------------------------
     def on_start(self):
-        Logger.Success("---------------- Mining task started ----------------")
+        Logger.Info("Mining-Task (applying configs)")
+
+        Logger.Success("Mining-Task (started)")
 
     def on_stop(self):
-        Logger.Error("---------------- Mining task stopped ----------------")
+        Logger.Error("Mining-Task (stopped)")
 
     # ---------------------------------------------------------
     # Main Loop

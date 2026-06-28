@@ -5,20 +5,14 @@ from Services.ActionFactory import ActionFactory
 
 
 class ModuleUI:
-    """Base UI container for a module.
+    """Base UI container for a module."""
 
-    Improvements vs old version:
-      - no longer embeds a ttk.Frame inside a tk.Text.
-      - uses a Canvas+scrollbar so module settings can be styled
-        consistently (background/padding/card feel).
-    """
-
-    def __init__(self, parent, task, configs):
+    def __init__(self, parent, task):
         self.task = task
         self.parent = parent
-        self.configs = configs or {}
-        self.settings = self.configs.get("settings", {})
-        self.actions = ActionFactory.Create(self.configs.get("actions", []))
+        self.configs = task.configs
+        self.actions = task.actions
+        self.settings = task.settings
 
         # ---- Outer canvas + scrollbar (for module scrolling) ----
         self._container = ttk.Frame(parent, style="ModulePanel.TFrame")
@@ -86,11 +80,6 @@ class ModuleUI:
             _on_frame_configure()
 
         self._canvas.bind("<Configure>", _on_canvas_configure)
-
-        # ---- Shared header look (modules can optionally create their own) ----
-        # Provide a convenient, reusable "settings card" style.
-        # Individual module UIs currently create their own ttk.LabelFrame; those will
-        # also benefit from the updated global ttk styles in Scheduler.
 
     def widget(self):
         return self._container

@@ -70,7 +70,6 @@ class Scheduler(ttk.Frame):
         )
         style.map("TButton", background=[("active", "#d9d9d9")])
 
-        # Used by Modules/ModuleUI.py
         style.configure("ModulePanel.TFrame", background="#f2f2f2")
         style.configure(
             "ModuleCard.TFrame", background="#ffffff", borderwidth=1, relief="solid"
@@ -161,12 +160,12 @@ class Scheduler(ttk.Frame):
         first_module = list(TASK_REGISTRY.keys())[0]
         self.switch_module(first_module)
 
-    def load_icon(self, module_path):
-        icon_path = os.path.join(module_path, "icon.png")
+    def load_icon(self, path):
+        icon_path = os.path.join(path, "icon.png")
         if os.path.exists(icon_path):
             img = Image.open(icon_path).resize((18, 18))
             tk_img = ImageTk.PhotoImage(img)
-            self.icons[module_path] = tk_img
+            self.icons[path] = tk_img
             return tk_img
         return None
 
@@ -180,12 +179,11 @@ class Scheduler(ttk.Frame):
 
         meta = TASK_REGISTRY[module_name]
         TaskClass = meta["task"]
-        module_path = meta["path"]
+        path = meta["path"]
         self.runnable = meta["runnable"]
-        configs = meta["configs"]
 
         # Create task instance for UI apply/config updates
-        self.task = TaskClass(module_path=module_path, configs=configs)
+        self.task = TaskClass(path=path)
 
         # UI cache
         if (
@@ -208,7 +206,7 @@ class Scheduler(ttk.Frame):
 
             UIClass = TASK_UI_REGISTRY.get(module_name)
             if UIClass:
-                self.task_ui = UIClass(module_ui_frame, self.task, configs)
+                self.task_ui = UIClass(module_ui_frame, self.task)
                 self.module_ui_instances[module_name] = self.task_ui
                 widget = self.task_ui.widget()
                 widget.grid(row=0, column=0, sticky="nsew")
@@ -300,11 +298,8 @@ class Scheduler(ttk.Frame):
         if module_name not in self.module_tasks:
             meta = TASK_REGISTRY[module_name]
             TaskClass = meta["task"]
-            module_path = meta["path"]
-            configs = meta["configs"]
-            self.module_tasks[module_name] = TaskClass(
-                module_path=module_path, configs=configs
-            )
+            path = meta["path"]
+            self.module_tasks[module_name] = TaskClass(path=path)
 
         task = self.module_tasks[module_name]
 
