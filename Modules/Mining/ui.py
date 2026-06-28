@@ -37,8 +37,3 @@ class TaskUI(ModuleUI):
         ttk.Checkbutton(
             settings, text="Enable Stashing", variable=self.enable_stash
         ).grid(row=2, column=0, sticky="w", pady=4)
-
-    def apply(self):
-        self.task.mining_delay = self.mining_delay.get()
-        self.task.stash_delay = self.stash_delay.get()
-        self.task.enable_stash = self.enable_stash.get()

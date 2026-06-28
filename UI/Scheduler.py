@@ -311,7 +311,6 @@ class Scheduler(ttk.Frame):
         ui = self.module_ui_instances.get(module_name)
         if ui is not None:
             ui.task = task
-            ui.apply()
 
         task.start()
         self.module_running[module_name] = True

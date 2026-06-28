@@ -94,6 +94,3 @@ class ModuleUI:
 
     def widget(self):
         return self._container
-
-    def apply(self):
-        pass
